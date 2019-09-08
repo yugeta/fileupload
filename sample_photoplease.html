@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MYNT-FileUploader</title>
+  <script src="images.js"></script>
+</head>
+<body>
+  <h1>MYNT-File-Uploader</h1>
+  <button id="btn" type="button">pickup-file</button>
+  <input type="text" name="test">
+
+
+<script>
+new $$fileupload({
+  url : "http://localhost/tools/fileupload/sample.php",
+  querys       : {
+    exit : true,
+    size : 300
+  },
+  btn_selector : "#btn",
+  file_select  : function(res){
+    new $$photography(res);
+  },
+  success : (function(res){
+    if(res){
+      var json = JSON.parse(res);
+      if(typeof json.message !== "undefined"){
+        console.log(json.message);
+      }
+      // 送信後処理
+      this.options.file_select(res);
+    }
+    if(this.postFiles_cache.length){
+      this.postFiles_cache.shift();
+    }
+    var lists = this.getEditImageLists();
+    if(lists.length){
+      lists[0].parentNode.removeChild(lists[0]);
+    }
+
+    // 送信後の削除処理をした直後のエレメント一覧の取得
+    var lists = this.getEditImageLists();
+
+    if(lists.length){
+      setTimeout((function(lists,e){this.postFile(lists)}).bind(this,lists[0]) , 1000);
+    }
+    else{
+      this.clickCancel();
+    }
+  }).bind(this)
+});
+</script>
+</body>
+</html>

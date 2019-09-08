@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MYNT-FileUploader</title>
+  <script src="images.js"></script>
+</head>
+<body>
+  <h1>MYNT-File-Uploader</h1>
+  <button id="btn" type="button">pickup-file</button>
+  <input type="text" name="test">
+
+
+<script>
+new $$fileupload({
+  url : "http://localhost/tools/fileupload/sample.php",
+  querys       : {
+    exit : true,
+    size : 300
+  },
+  btn_selector : "#btn",
+  file_select  : function(res , options){
+    // new $$photography(res);
+// console.log(res);
+// console.log(options);
+  },
+  post_success : function(res , options){
+console.log(res);
+// console.log(this.url);
+// console.log(options);
+// console.log("file");
+  },
+  post_finish : function(res , options){
+// console.log(res);
+// console.log(this.url);
+// console.log(options);
+    console.log("finished !!!");
+  },
+  post_error : function(res , options){
+console.log(res);
+  }
+
+});
+</script>
+</body>
+</html>

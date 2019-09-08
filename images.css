@@ -1,0 +1,201 @@
+.fileUpload-image-bg{
+  position:fixed;
+  display:block;
+  top:0;
+  left:0;
+  background-color:rgba(0,0,0,0.5);
+  width:100%;
+  height:100%;
+  z-index:1000;
+  overflow-y:auto;
+}
+.fileUpload-image-bg ul,
+.fileUpload-image-bg li{
+  list-style:none;
+  padding:0;
+  margin:0;
+  border:0;
+  width:100%;
+}
+.fileUpload-image-bg ul{
+  counter-reset:num;
+
+  height:100%;
+  /* overflow-Y:auto; */
+  padding:40px 0;
+}
+.fileUpload-image-bg ul li{
+  /* min-width:300px;
+  max-width:640px;
+  width:50%; */
+  width:300px;
+  text-align:center;
+  position:relative;
+  margin:20px auto;
+}
+
+.fileUpload-image-bg ul li.pic{
+  height:300px;
+  padding:4px;
+  border:1px solid white;
+  background-color:white;
+}
+
+.fileUpload-image-bg ul li.pic:before{
+  counter-increment: num;
+  content: counter(num);
+
+  position:absolute;
+  top:0;
+  left:0;
+  display:inline-block;
+  width:30px;
+  height:30px;
+  font-size:20px;
+  color:white;
+  text-shadow:2px 2px 4px black;
+
+  z-index:100;
+}
+
+
+/* .fileUpload-image-bg li .num{
+  position:absolute;
+  top:0;
+  left:0;
+  display:inline-block;
+  width:30px;
+  height:30px;
+  font-size:20px;
+  color:white;
+  text-shadow:2px 2px 4px black;
+} */
+.fileUpload-image-bg li .control{
+  position:absolute;
+  top:calc(50% - 20px);
+  width:100%;
+  height:40px;
+  /* text-align:center; */
+
+  /* display: -webkit-flex;
+  display: flex; */
+  display:none;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.fileUpload-image-bg li:hover .control{
+  display: -webkit-flex;
+  display: flex;
+}
+.fileUpload-image-bg li .control .rotate,
+.fileUpload-image-bg li .control .delete{
+  width:40px;
+  height:40px;
+  cursor:pointer;
+  filter: drop-shadow(2px 2px 2px black);
+  /* display:list-item; */
+  margin:0 20px;
+}
+.fileUpload-image-bg li .control .rotate:hover,
+.fileUpload-image-bg li .control .delete:hover{
+  opacity:0.5;
+}
+
+.fileUpload-image-bg img.picture{
+  width:100%;
+  height:100%;
+  display:block;
+  margin:auto;
+  vertical-align:middle;
+  object-fit:contain;
+}
+
+.fileUpload-image-bg img.picture[data-rotate="90"]{
+  transform:rotate(90deg);
+}
+.fileUpload-image-bg img.picture[data-rotate="180"]{
+  transform:rotate(180deg);
+}
+.fileUpload-image-bg img.picture[data-rotate="270"]{
+  transform:rotate(270deg);
+}
+
+/* Uploading-animation */
+.fileUpload-image-bg li.submit button{
+  margin:10px 20px;
+  font-size:12px;
+  padding:4px 8px;
+  border:1px solid #ccc;
+  background-color:#eee;
+  border-radius:4px;
+}
+.fileUpload-image-bg li.submit[data-uploading="1"] button{
+  display:none;
+}
+
+.fileUpload-image-bg li.submit .uploading{
+  display:none;
+}
+.fileUpload-image-bg li.submit[data-uploading="1"] .uploading{
+  display:inline-block;
+}
+.fileUpload-image-bg li.submit .uploading{
+  position:relative;
+  width:128px;
+  height:128px;
+}
+.fileUpload-image-bg li.submit .uploading > .dot{
+  position:absolute;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+}
+.fileUpload-image-bg li.submit .uploading > .dot:after{
+  content:"";
+  position:absolute;
+  left:calc(50% - 10px);
+  top:0;
+  width:15%;
+  height:15%;
+  border-radius:50%;
+  background-color:white;
+  border:0;
+  margin:0;
+  padding:0;
+  font-size:0;
+  animation: anim-circle-ex-dot 1.2s ease-in-out infinite;
+}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(1){transform:rotate(0deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(1):after{animation-delay: 0s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(2){transform:rotate(30deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(2):after{animation-delay: -1.1s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(3){transform:rotate(60deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(3):after{animation-delay: -1.0s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(4){transform:rotate(90deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(4):after{animation-delay: -0.9s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(5){transform:rotate(120deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(5):after{animation-delay: -0.8s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(6){transform:rotate(150deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(6):after{animation-delay: -0.7s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(7){transform:rotate(180deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(7):after{animation-delay: -0.6s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(8){transform:rotate(210deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(8):after{animation-delay: -0.5s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(9){transform:rotate(240deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(9):after{animation-delay: -0.4s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(10){transform:rotate(270deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(10):after{animation-delay: -0.3s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(11){transform:rotate(300deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(11):after{animation-delay: -0.2s;}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(12){transform:rotate(330deg);}
+.fileUpload-image-bg li.submit .uploading > .dot:nth-child(12):after{animation-delay: -0.1s;}
+@keyframes anim-circle-ex-dot{
+  0%{transform:scale(0.0);}
+  35%{transform:scale(1.0);}
+  70%{transform:scale(0.0);}
+  100%{transform:scale(0.0);}
+}
+
