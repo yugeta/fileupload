@@ -94,12 +94,28 @@
     // 画像アップロード前のプレビュー用
     css_path      : null, // 表示系cssの任意指定（デフォルト(null)は起動スクリプトと同一階層）
     file_multi    : true, // 複数ファイルアップロード対応 [ true : 複数  , false : 1つのみ]
-    view_bg_class : "fileUpload-image-bg", // 画像編集用モードのBG(base)要素のclass名
     extensions    : ["jpg","jpeg","png","gif","svg"], // 指定拡張子一覧（必要なもののみセット可能）
     img_rotate_button : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
     img_delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
 
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
+
+    // dom構造(className)
+    dom:{
+      base : "fileUpload-image-bg",
+        ul : "",
+          li : "pic",
+            img : "picture",
+            control : "control",
+              rotate : "rotate",
+              delete : "delete",
+            resize : "resize-area",
+          li_submit : "submit",
+            btn_submit : "button_submit",
+            btn_cancel : "button_cancel",
+            uploading  : "uploading",
+            uploading_dot : "dot"
+    },
 
     file_select   : function(res){console.log(res)},  // ファイル選択直後の任意イベント処理
     post_success  : function(res){console.log(res)},  // 1ファイルファイル送信完了後の任意イベント処理
@@ -156,7 +172,7 @@
   };
 
   $$.prototype.getBase = function(){
-    var lists = document.getElementsByClassName(this.options.view_bg_class);
+    var lists = document.getElementsByClassName(this.options.dom.base);
     if(lists.length){
       return lists[0];
     }
@@ -172,7 +188,7 @@
 
   // 編集画面の画像一覧リストの取得
   $$.prototype.getEditImageLists = function(){
-    return document.querySelectorAll("."+this.options.view_bg_class+" ul li.pic");
+    return document.querySelectorAll("."+this.options.dom.base+" ."+this.options.dom.li);
   };
 
   $$.prototype.setTypeFile = function(){
@@ -187,7 +203,6 @@
       if(typeof this.options.file_select === "function" && __checkFileAPI()){
         var input = e.currentTarget;
         this.viewImageEdit(input);
-
         this.options.file_select(e , this.options);
       }
     }).bind(this));
@@ -218,10 +233,7 @@
     // システムデータ保持
     this.options.id = Math.floor((+new Date())/1000);
     this.options.count = targetInputForm.files.length;
-// console.log(this.options.id+"/"+this.options.count);
   };
-
-  // [画像編集] 画像回転処理
 
 
   // [画像編集] 編集画面表示（複数画像対応）
@@ -232,8 +244,7 @@
     var files = filesElement.files;
     if(!files || !files.length){return;}
 
-
-    var bgs = document.getElementsByClassName(this.options.view_bg_class);
+    var bgs = document.getElementsByClassName(this.options.dom.base);
     if(!bgs || !bgs.length){return;}
     var bg = bgs[0];
 
@@ -241,52 +252,70 @@
     bg.appendChild(ul);
 
     for(var i=0; i<files.length; i++){
-      var li = document.createElement("li");
-      li.className = "pic";
-      li.setAttribute("data-num" , i);
+      var li = this.setImagePreview(files[i] , i);
       ul.appendChild(li);
-
-      var path = URL.createObjectURL(files[i]);
-
-      var img = new Image();
-      img.src = path;
-      img.className = "picture";
-      img.setAttribute("data-num"  , i);
-      __event(img , "load" , (function(e){this.loadedImage(e)}).bind(this));
-      li.appendChild(img);
-
-      var num = document.createElement("div");
-      num.className = "num";
-      li.appendChild(num);
-
-      var control = document.createElement("div");
-      control.className = "control";
-      control.setAttribute("data-num" , i);
-      li.appendChild(control);
-      
-
-      var rotateImage = new Image();
-      rotateImage.className = "rotate";
-      rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "rotate.svg";
-      control.appendChild(rotateImage);
-      __event(rotateImage , "click" , (function(e){this.clickRotateButton(e)}).bind(this));
-
-      var delImage = new Image();
-      delImage.className = "delete";
-      delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
-      control.appendChild(delImage);
-      __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
-
     }
 
-
     // submit,cancel-button
-    var li = document.createElement("li");
-    li.className = "submit";
+    var file_count = files.length;
+    var li = this.setControlButtons(file_count);
     ul.appendChild(li);
+  };
+
+
+  // プレビュー表示の写真表示箇所のエレメントセット
+  $$.prototype.setImagePreview = function(fl,i){
+    var li = document.createElement("li");
+    li.className = this.options.dom.li;
+    li.setAttribute("data-num" , i);
+
+    var path = URL.createObjectURL(fl);
+
+    var img = new Image();
+    img.src = path;
+    img.className = this.options.dom.img;
+    img.setAttribute("data-num"  , i);
+    __event(img , "load" , (function(e){this.loadedImage(e)}).bind(this));
+    li.appendChild(img);
+
+    // var num = document.createElement("div");
+    // num.className = "num";
+    // li.appendChild(num);
+
+    var control = document.createElement("div");
+    control.className = this.options.dom.control;
+    control.setAttribute("data-num" , i);
+    li.appendChild(control);
+    
+
+    var rotateImage = new Image();
+    rotateImage.className = this.options.dom.rotate;
+    rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "rotate.svg";
+    control.appendChild(rotateImage);
+    __event(rotateImage , "click" , (function(e){this.clickRotateButton(e)}).bind(this));
+
+    var delImage = new Image();
+    delImage.className = this.options.dom.delete;
+    delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
+    control.appendChild(delImage);
+    __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
+
+    // resize-control
+    var resize_area = document.createElement("div");
+    resize_area.className = this.options.dom.resize_area;
+    li.appendChild(resize_area);
+
+    return li;
+  };
+
+
+  // submit,cancel-button
+  $$.prototype.setControlButtons = function(file_count){
+    var li = document.createElement("li");
+    li.className = this.options.dom.li_submit;
 
     var sendButton = document.createElement("button");
-    if(files.length > 1){
+    if(file_count > 1){
       sendButton.innerHTML = "すべて送信";
     }
     else{
@@ -302,13 +331,15 @@
     li.appendChild(cancelButton);
 
     var uploading = document.createElement("div");
-    uploading.className = "uploading";
+    uploading.className = this.options.dom.uploading;
     li.appendChild(uploading);
     for(var i=0; i<12;i++){
       var dot = document.createElement("div");
-      dot.className = "dot";
+      dot.className = this.options.dom.uploading_dot;
       uploading.appendChild(dot);
     }
+
+    return li;
   };
 
   
@@ -317,19 +348,18 @@
   // [画像編集] BG表示
   $$.prototype.viewBG = function(){
     var bg = document.createElement("div");
-    bg.className = this.options.view_bg_class;
+    bg.className = this.options.dom.base;
     document.body.appendChild(bg);
   };
 
   // [画像編集] rotateボタンを押した時の処理（左に90度回転）
   $$.prototype.clickRotateButton = function(e){
     var target = e.currentTarget;
-// console.log(target.parentNode.getAttribute("data-num"));
 
     var num = target.parentNode.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetImage = document.querySelector("."+this.options.view_bg_class+" ul li.pic[data-num='"+num+"'] img.picture");
+    var targetImage = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"'] img.picture");
     if(!targetImage){return;}
 
     var rotateNum = targetImage.getAttribute("data-rotate");
@@ -352,7 +382,6 @@
     }
 
     targetImage.setAttribute("data-rotate" , rotateNum);
-
   };
 
   //
@@ -360,11 +389,10 @@
     if(!confirm("アップロードリストから写真を破棄しますか？※直接撮影された写真は保存されません。")){return;}
 
     var target = e.currentTarget;
-    // console.log(target.parentNode.getAttribute("data-num"));
     var num = target.parentNode.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetListBase = document.querySelector("."+this.options.view_bg_class+" ul li.pic[data-num='"+num+"']");
+    var targetListBase = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"']");
     if(!targetListBase){return;}
 
     targetListBase.parentNode.removeChild(targetListBase);
@@ -413,7 +441,6 @@
     var lists = this.getEditImageLists();
     for(var i=0; i<lists.length; i++){
       var num = lists[i].getAttribute("data-num");
-      // this.postFile(files[num]);
       this.postFiles_cache.push(files[num]);
     }
 
