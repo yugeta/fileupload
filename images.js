@@ -109,7 +109,10 @@
             control : "control",
               rotate : "rotate",
               delete : "delete",
-            resize : "resize-area",
+            resize_area : "resize-area",
+              resize_relative : "resize-relative",
+                resize_box     : "resize-box",
+                resize_pointer : "resize-pointer",
           li_submit : "submit",
             btn_submit : "button_submit",
             btn_cancel : "button_cancel",
@@ -142,7 +145,12 @@
     this.setTypeFile();
 
 		// upload-button
-		this.setButton();
+    this.setButton();
+    
+    // event
+    __event(window , "mousedown" , (function(e){this.resize_pointer_down(e)}).bind(this));
+    __event(window , "mousemove" , (function(e){this.resize_pointer_move(e)}).bind(this));
+    __event(window , "mouseup"   , (function(e){this.resize_pointer_up(e)}).bind(this));
 
   };
 
@@ -254,6 +262,8 @@
     for(var i=0; i<files.length; i++){
       var li = this.setImagePreview(files[i] , i);
       ul.appendChild(li);
+      // var resize = this.setResizePreview(li);
+      // li.appendChild(resize);
     }
 
     // submit,cancel-button
@@ -275,7 +285,10 @@
     img.src = path;
     img.className = this.options.dom.img;
     img.setAttribute("data-num"  , i);
-    __event(img , "load" , (function(e){this.loadedImage(e)}).bind(this));
+    __event(img , "load" , (function(e){
+      this.loadedImage(e);
+      this.setResizePreview(e.target);
+    }).bind(this));
     li.appendChild(img);
 
     // var num = document.createElement("div");
@@ -300,12 +313,116 @@
     control.appendChild(delImage);
     __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
-    // resize-control
+    return li;
+  };
+
+  // resize-control
+  $$.prototype.setResizePreview = function(img){
+
+    var border_size = 2 * 2;
+
+    var imgSize = this.getImageSize(img);
+    if(!imgSize){return}
+    var li = img.parentNode;
+    var resize_elm = li.querySelector("."+this.options.dom.resize_area);
+    if(resize_elm){
+      resize_elm.parentNode.removeChild(resize_elm);
+    }
+
+    // area + relative
     var resize_area = document.createElement("div");
     resize_area.className = this.options.dom.resize_area;
     li.appendChild(resize_area);
 
-    return li;
+    var resize_relative = document.createElement("div");
+    resize_relative.className = this.options.dom.resize_relative;
+    resize_area.appendChild(resize_relative);
+
+
+    // pointer-area
+    var resize_box = document.createElement("div");
+    resize_box.className = this.options.dom.resize_box;
+    resize_box.style.setProperty("top"    , imgSize.top +"px" , "");
+    resize_box.style.setProperty("left"   , imgSize.left +"px" , "");
+    resize_box.style.setProperty("width"  , (imgSize.width - border_size) +"px" , "");
+    resize_box.style.setProperty("height" , (imgSize.height - border_size) +"px" , "");
+    resize_relative.appendChild(resize_box);
+
+    // pointer : top-left
+    var resize_pointer_1 = document.createElement("div");
+    resize_pointer_1.className = this.options.dom.resize_pointer;
+    resize_pointer_1.setAttribute("data-type","top-left");
+    resize_pointer_1.style.setProperty("top"  , imgSize.top  + "px" , "");
+    resize_pointer_1.style.setProperty("left" , imgSize.left + "px" , "");
+    resize_relative.appendChild(resize_pointer_1);
+
+    // pointer : top-right
+    var resize_pointer_2 = document.createElement("div");
+    resize_pointer_2.className = this.options.dom.resize_pointer;
+    resize_pointer_2.setAttribute("data-type","top-right");
+    resize_pointer_2.style.setProperty("top"  , imgSize.top   + "px" , "");
+    resize_pointer_2.style.setProperty("left" , (imgSize.left + imgSize.width - border_size) + "px" , "");
+    resize_relative.appendChild(resize_pointer_2);
+
+    // pointer : bottom-left
+    var resize_pointer_3 = document.createElement("div");
+    resize_pointer_3.className = this.options.dom.resize_pointer;
+    resize_pointer_3.setAttribute("data-type","bottom-left");
+    resize_pointer_3.style.setProperty("top"  , (imgSize.top + imgSize.height - border_size)  + "px" , "");
+    resize_pointer_3.style.setProperty("left" , imgSize.left + "px" , "");
+    resize_relative.appendChild(resize_pointer_3);
+
+    // pointer : bottom-right
+    var resize_pointer_4 = document.createElement("div");
+    resize_pointer_4.className = this.options.dom.resize_pointer;
+    resize_pointer_4.setAttribute("data-type","bottom-right");
+    resize_pointer_4.style.setProperty("top"  , (imgSize.top  + imgSize.height - border_size) + "px" , "");
+    resize_pointer_4.style.setProperty("left" , (imgSize.left + imgSize.width  - border_size) + "px" , "");
+    resize_relative.appendChild(resize_pointer_4);
+
+  };
+
+  $$.prototype.getImageSize = function(img){
+    if(!img){return}
+    var base = {
+      w : img.getAttribute("data-width"),
+      h : Number(img.getAttribute("data-height"))
+    };
+    // 横長
+    if(base.w > base.h){
+      var weight = base.h / base.w;
+      var w = img.offsetWidth;
+      var h = w * weight
+      var t = (w / 2) - (h / 2);
+      return {
+        top    : t,
+        left   : 0,
+        width  : w,
+        height : h
+      };
+    }
+    // 縦長
+    else if(base.w < base.h){
+      var weight = base.w / base.h;
+      var h = img.offsetHeight;
+      var w = h * weight;
+      var l = (h / 2) - (w / 2);
+      return {
+        top    : 0,
+        left   : l,
+        width  : w,
+        height : h
+      };
+    }
+    // 正方形
+    else{
+      return {
+        top    : 0,
+        left   : 0,
+        width  : img.offsetWidth,
+        height : img.offsetHeight
+      };
+    }
   };
 
 
@@ -359,7 +476,7 @@
     var num = target.parentNode.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetImage = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"'] img.picture");
+    var targetImage = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"'] img."+this.options.dom.img);
     if(!targetImage){return;}
 
     var rotateNum = targetImage.getAttribute("data-rotate");
@@ -380,8 +497,12 @@
         rotateNum = 180;
         break;
     }
-
     targetImage.setAttribute("data-rotate" , rotateNum);
+
+    var resize_area = document.querySelector("."+this.options.dom.base+" .pic[data-num='"+num+"'] ."+this.options.dom.resize_area);
+    if(resize_area){
+      resize_area.setAttribute("data-rotate" , rotateNum);
+    }
   };
 
   //
@@ -586,6 +707,114 @@
     }
   };
 
+
+  // Preview Resize -----
+  $$.prototype.resize_pointer_target  = null;
+  $$.prototype.resize_pointer_parent  = null;
+  $$.prototype.resize_pointer_imgSize = null;
+
+  $$.prototype.resize_pointer_down = function(e){
+    var target = e.target;
+    if(!target){return}
+    if(target.className !== this.options.dom.resize_pointer){return}
+    this.resize_pointer_target  = target;
+    this.resize_pointer_parent  = __upperSelector(target , ["."+this.options.dom.li]);
+    var img = this.resize_pointer_parent.querySelector("."+this.options.dom.img);
+    this.resize_pointer_imgSize = this.getImageSize(img);
+    target.setAttribute("data-target","1");
+  };
+  $$.prototype.resize_pointer_move = function(e){
+    if(this.resize_pointer_target  === null
+    || this.resize_pointer_imgSize === null
+    || this.resize_pointer_parent  === null){return}
+    this.set_resize_popinter_target(this.resize_pointer_target , this.resize_pointer_parent , this.resize_pointer_imgSize , e.pageX , e.pageY);
+  }
+
+  $$.prototype.set_resize_popinter_target = function(target,parent,imgSize,px,py){
+    var borderWidth = 2*2;
+    var x = px - parent.offsetLeft;
+    x = (x < imgSize.left) ? imgSize.left : x;
+    x = (x > imgSize.left + imgSize.width - borderWidth) ? imgSize.left + imgSize.width - borderWidth : x;
+    var y = py - parent.offsetTop;
+    y = (y < imgSize.top) ? imgSize.top : y;
+    y = (y > imgSize.top + imgSize.height - borderWidth) ? imgSize.top + imgSize.height - borderWidth : y;
+    target.style.setProperty("top"  , y + "px" , "");
+    target.style.setProperty("left" , x + "px" , "");
+
+    // interlocking
+    var parent = __upperSelector(target , ["."+this.options.dom.li]);
+    this.set_resize_popinter_interlocking(target , parent , x , y);
+    this.set_resize_popinter_area(parent);
+  };
+
+  $$.prototype.set_resize_popinter_interlocking = function(target , parent , x , y){
+    var type = target.getAttribute("data-type");
+    switch(type){
+      case "top-left":
+        var elm_x = parent.querySelector("[data-type='bottom-left']");
+        var elm_y = parent.querySelector("[data-type='top-right']");
+        break;
+      case "top-right":
+        var elm_x = parent.querySelector("[data-type='bottom-right']");
+        var elm_y = parent.querySelector("[data-type='top-left']");
+        break;
+      case "bottom-left":
+        var elm_x = parent.querySelector("[data-type='top-left']");
+        var elm_y = parent.querySelector("[data-type='bottom-right']");
+        break;
+      case "bottom-right":
+        var elm_x = parent.querySelector("[data-type='top-right']");
+        var elm_y = parent.querySelector("[data-type='bottom-left']");
+        break;
+    }
+    if(!elm_x || !elm_y){return;}
+    elm_x.style.setProperty("left" , x + "px" , "");
+    elm_y.style.setProperty("top"  , y + "px" , "");
+  };
+
+  $$.prototype.set_resize_popinter_area = function(parent){
+    var box = parent.querySelector("."+this.options.dom.resize_box);
+    if(!box){return}
+
+    var top_left     = parent.querySelector("[data-type='top-left']");
+    var top_right    = parent.querySelector("[data-type='top-right']");
+    var bottom_left  = parent.querySelector("[data-type='bottom-left']");
+
+    box.style.setProperty("left"   , top_left.offsetLeft + "px" , "");
+    box.style.setProperty("top"    , top_left.offsetTop  + "px" , "");
+    box.style.setProperty("width"  , (top_right.offsetLeft  - top_left.offsetLeft) + "px" , "");
+    box.style.setProperty("height" , (bottom_left.offsetTop - top_left.offsetTop) + "px" , "");
+  };
+  $$.prototype.get_resize_popinter_area = function(pic){
+    if(!pic){return}
+    var area = pic.querySelector("."+this.options.dom.resize_area);
+    var img  = pic.querySelector("."+this.options.dom.img);
+    var w    = Number(img.getAttribute("data-width"));
+    var h    = Number(img.getAttribute("data-height"));
+    var rate = (w > h) ? area.offsetWidth / w : area.offsetHeight / h;
+
+    var rotate = img.getAttribute("data-rotate");
+    rotate = (rotate) ? rotate : 0;
+    return {
+      left   : area.offsetLeft / rate,
+      top    : area.offsetTop / rate,
+      width  : area.offsetWidth / rate,
+      height : area.offsetHeight / rate,
+      rotate : rotate
+    };
+  }
+
+
+
+  $$.prototype.resize_pointer_up = function(){
+    if(this.resize_pointer_target  === null
+    || this.resize_pointer_imgSize === null
+    || this.resize_pointer_parent  === null){return}
+    this.resize_pointer_target.removeAttribute("data-target");
+    this.resize_pointer_target = null;
+    this.resize_pointer_imgSize  = null;
+    this.resize_pointer_parent = null;
+  }
 
   
   return $$;
