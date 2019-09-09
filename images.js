@@ -97,6 +97,7 @@
     extensions    : ["jpg","jpeg","png","gif","svg"], // 指定拡張子一覧（必要なもののみセット可能）
     img_rotate_button : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
     img_delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_trim_button   : null,
 
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
 
@@ -108,11 +109,12 @@
             img : "picture",
             control : "control",
               rotate : "rotate",
+              trim   : "trim",
               delete : "delete",
-            resize_area : "resize-area",
-              resize_relative : "resize-relative",
-                resize_box     : "resize-box",
-                resize_pointer : "resize-pointer",
+            trim_area : "trim-area",
+              trim_relative : "trim-relative",
+                trim_box     : "trim-box",
+                trim_pointer : "trim-pointer",
           li_submit : "submit",
             btn_submit : "button_submit",
             btn_cancel : "button_cancel",
@@ -148,9 +150,9 @@
     this.setButton();
     
     // event
-    __event(window , "mousedown" , (function(e){this.resize_pointer_down(e)}).bind(this));
-    __event(window , "mousemove" , (function(e){this.resize_pointer_move(e)}).bind(this));
-    __event(window , "mouseup"   , (function(e){this.resize_pointer_up(e)}).bind(this));
+    __event(window , "mousedown" , (function(e){this.trim_pointer_down(e)}).bind(this));
+    __event(window , "mousemove" , (function(e){this.trim_pointer_move(e)}).bind(this));
+    __event(window , "mouseup"   , (function(e){this.trim_pointer_up(e)}).bind(this));
 
   };
 
@@ -262,8 +264,8 @@
     for(var i=0; i<files.length; i++){
       var li = this.setImagePreview(files[i] , i);
       ul.appendChild(li);
-      // var resize = this.setResizePreview(li);
-      // li.appendChild(resize);
+      // var trim = this.setTrimPreview(li);
+      // li.appendChild(trim);
     }
 
     // submit,cancel-button
@@ -287,7 +289,7 @@
     img.setAttribute("data-num"  , i);
     __event(img , "load" , (function(e){
       this.loadedImage(e);
-      this.setResizePreview(e.target);
+      this.setTrimPreview(e.target);
     }).bind(this));
     li.appendChild(img);
 
@@ -313,72 +315,78 @@
     control.appendChild(delImage);
     __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
+    var trimImage = new Image();
+    trimImage.className = this.options.dom.trim;
+    trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "crop.svg";
+    control.appendChild(trimImage);
+    __event(trimImage , "click" , (function(e){this.clickTrimButton(e)}).bind(this));
+
     return li;
   };
 
-  // resize-control
-  $$.prototype.setResizePreview = function(img){
+  // trim-control
+  $$.prototype.setTrimPreview = function(img){
 
     var border_size = 2 * 2;
 
     var imgSize = this.getImageSize(img);
     if(!imgSize){return}
     var li = img.parentNode;
-    var resize_elm = li.querySelector("."+this.options.dom.resize_area);
-    if(resize_elm){
-      resize_elm.parentNode.removeChild(resize_elm);
+    var trim_elm = li.querySelector("."+this.options.dom.trim_area);
+    if(trim_elm){
+      trim_elm.parentNode.removeChild(trim_elm);
     }
 
     // area + relative
-    var resize_area = document.createElement("div");
-    resize_area.className = this.options.dom.resize_area;
-    li.appendChild(resize_area);
+    var trim_area = document.createElement("div");
+    trim_area.className = this.options.dom.trim_area;
+    li.appendChild(trim_area);
 
-    var resize_relative = document.createElement("div");
-    resize_relative.className = this.options.dom.resize_relative;
-    resize_area.appendChild(resize_relative);
+    var trim_relative = document.createElement("div");
+    trim_relative.className = this.options.dom.trim_relative;
+    trim_area.appendChild(trim_relative);
 
 
     // pointer-area
-    var resize_box = document.createElement("div");
-    resize_box.className = this.options.dom.resize_box;
-    resize_box.style.setProperty("top"    , imgSize.top +"px" , "");
-    resize_box.style.setProperty("left"   , imgSize.left +"px" , "");
-    resize_box.style.setProperty("width"  , (imgSize.width - border_size) +"px" , "");
-    resize_box.style.setProperty("height" , (imgSize.height - border_size) +"px" , "");
-    resize_relative.appendChild(resize_box);
+    var trim_box = document.createElement("div");
+    trim_box.className = this.options.dom.trim_box;
+    trim_box.style.setProperty("top"    , imgSize.top +"px" , "");
+    trim_box.style.setProperty("left"   , imgSize.left +"px" , "");
+    trim_box.style.setProperty("width"  , (imgSize.width - border_size) +"px" , "");
+    trim_box.style.setProperty("height" , (imgSize.height - border_size) +"px" , "");
+    trim_relative.appendChild(trim_box);
 
     // pointer : top-left
-    var resize_pointer_1 = document.createElement("div");
-    resize_pointer_1.className = this.options.dom.resize_pointer;
-    resize_pointer_1.setAttribute("data-type","top-left");
-    resize_pointer_1.style.setProperty("top"  , imgSize.top  + "px" , "");
-    resize_pointer_1.style.setProperty("left" , imgSize.left + "px" , "");
-    resize_relative.appendChild(resize_pointer_1);
+    var trim_pointer_1 = document.createElement("div");
+    trim_pointer_1.className = this.options.dom.trim_pointer;
+    trim_pointer_1.setAttribute("data-type","top-left");
+    trim_pointer_1.style.setProperty("top"  , imgSize.top  + "px" , "");
+    trim_pointer_1.style.setProperty("left" , imgSize.left + "px" , "");
+    trim_relative.appendChild(trim_pointer_1);
 
     // pointer : top-right
-    var resize_pointer_2 = document.createElement("div");
-    resize_pointer_2.className = this.options.dom.resize_pointer;
-    resize_pointer_2.setAttribute("data-type","top-right");
-    resize_pointer_2.style.setProperty("top"  , imgSize.top   + "px" , "");
-    resize_pointer_2.style.setProperty("left" , (imgSize.left + imgSize.width - border_size) + "px" , "");
-    resize_relative.appendChild(resize_pointer_2);
+    var trim_pointer_2 = document.createElement("div");
+    trim_pointer_2.className = this.options.dom.trim_pointer;
+    trim_pointer_2.setAttribute("data-type","top-right");
+    trim_pointer_2.style.setProperty("top"  , imgSize.top   + "px" , "");
+    trim_pointer_2.style.setProperty("left" , (imgSize.left + imgSize.width - border_size) + "px" , "");
+    trim_relative.appendChild(trim_pointer_2);
 
     // pointer : bottom-left
-    var resize_pointer_3 = document.createElement("div");
-    resize_pointer_3.className = this.options.dom.resize_pointer;
-    resize_pointer_3.setAttribute("data-type","bottom-left");
-    resize_pointer_3.style.setProperty("top"  , (imgSize.top + imgSize.height - border_size)  + "px" , "");
-    resize_pointer_3.style.setProperty("left" , imgSize.left + "px" , "");
-    resize_relative.appendChild(resize_pointer_3);
+    var trim_pointer_3 = document.createElement("div");
+    trim_pointer_3.className = this.options.dom.trim_pointer;
+    trim_pointer_3.setAttribute("data-type","bottom-left");
+    trim_pointer_3.style.setProperty("top"  , (imgSize.top + imgSize.height - border_size)  + "px" , "");
+    trim_pointer_3.style.setProperty("left" , imgSize.left + "px" , "");
+    trim_relative.appendChild(trim_pointer_3);
 
     // pointer : bottom-right
-    var resize_pointer_4 = document.createElement("div");
-    resize_pointer_4.className = this.options.dom.resize_pointer;
-    resize_pointer_4.setAttribute("data-type","bottom-right");
-    resize_pointer_4.style.setProperty("top"  , (imgSize.top  + imgSize.height - border_size) + "px" , "");
-    resize_pointer_4.style.setProperty("left" , (imgSize.left + imgSize.width  - border_size) + "px" , "");
-    resize_relative.appendChild(resize_pointer_4);
+    var trim_pointer_4 = document.createElement("div");
+    trim_pointer_4.className = this.options.dom.trim_pointer;
+    trim_pointer_4.setAttribute("data-type","bottom-right");
+    trim_pointer_4.style.setProperty("top"  , (imgSize.top  + imgSize.height - border_size) + "px" , "");
+    trim_pointer_4.style.setProperty("left" , (imgSize.left + imgSize.width  - border_size) + "px" , "");
+    trim_relative.appendChild(trim_pointer_4);
 
   };
 
@@ -390,11 +398,13 @@
     };
     // 横長
     if(base.w > base.h){
-      var weight = base.h / base.w;
+      var aspect = base.h / base.w;
       var w = img.offsetWidth;
-      var h = w * weight
+      var h = w * aspect
       var t = (w / 2) - (h / 2);
+      var rate = w / base.w;
       return {
+        rate   : rate,
         top    : t,
         left   : 0,
         width  : w,
@@ -403,11 +413,13 @@
     }
     // 縦長
     else if(base.w < base.h){
-      var weight = base.w / base.h;
+      var aspect = base.w / base.h;
       var h = img.offsetHeight;
-      var w = h * weight;
+      var w = h * aspect;
       var l = (h / 2) - (w / 2);
+      var rate = h / base.h;
       return {
+        rate   : rate,
         top    : 0,
         left   : l,
         width  : w,
@@ -417,6 +429,7 @@
     // 正方形
     else{
       return {
+        rate   : img.offsetWidth / base.w,
         top    : 0,
         left   : 0,
         width  : img.offsetWidth,
@@ -479,8 +492,8 @@
     var targetImage = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"'] img."+this.options.dom.img);
     if(!targetImage){return;}
 
-    var rotateNum = targetImage.getAttribute("data-rotate");
-    rotateNum = (rotateNum) ? rotateNum : "0";
+    var beforeRotateNum = targetImage.getAttribute("data-rotate");
+    var rotateNum = (beforeRotateNum) ? beforeRotateNum : "0";
 
     // 反時計回りに回転
     switch(rotateNum){
@@ -499,10 +512,13 @@
     }
     targetImage.setAttribute("data-rotate" , rotateNum);
 
-    var resize_area = document.querySelector("."+this.options.dom.base+" .pic[data-num='"+num+"'] ."+this.options.dom.resize_area);
-    if(resize_area){
-      resize_area.setAttribute("data-rotate" , rotateNum);
-    }
+    // // trim-rotate
+    // var trim_area = document.querySelector("."+this.options.dom.base+" .pic[data-num='"+num+"'] ."+this.options.dom.trim_area);
+    // if(trim_area){
+    //   trim_area.setAttribute("data-rotate" , rotateNum);
+    // }
+    // this.setTrimRotate(__upperSelector(target , ["."+this.options.dom.li]) , beforeRotateNum , rotateNum);
+    this.setTrimRotate_reset(__upperSelector(target , ["."+this.options.dom.li]) , rotateNum);
   };
 
   //
@@ -527,6 +543,21 @@
     // キャッシュデータを更新
     this.options.count = lists.length;
   }
+
+  $$.prototype.clickTrimButton = function(e){
+    var target = e.currentTarget;
+    if(!target){return}
+    var parent = __upperSelector(target , ["."+this.options.dom.li]);
+    if(!parent){return}
+    var trim_area = parent.querySelector("."+this.options.dom.trim_area);
+    if(!trim_area){return}
+    if(trim_area.getAttribute("data-visible") === "1"){
+      trim_area.removeAttribute("data-visible");
+    }
+    else{
+      trim_area.setAttribute("data-visible","1");
+    }
+  };
 
   // 
   $$.prototype.clickCancel = function(){
@@ -601,21 +632,58 @@
         fd.append(i , this.options.querys[i]);
       }
     }
-    fd.append("id"         , this.options.id);
-    fd.append("num"        , (this.options.count - this.postFiles_cache.length));
-    fd.append("imageFile"  , this.postFiles_cache[0]);
-    fd.append("info[name]" , this.postFiles_cache[0].name);
-    fd.append("info[size]" , this.postFiles_cache[0].size);
-    fd.append("info[type]" , this.postFiles_cache[0].type);
-    fd.append("info[modi]" , this.postFiles_cache[0].lastModified);
-    fd.append("info[date]" , this.postFiles_cache[0].lastModifiedDate);
+    fd.append("id"           , this.options.id);
+    fd.append("num"          , (this.options.count - this.postFiles_cache.length));
+    fd.append("imageFile"    , this.postFiles_cache[0]);
+    fd.append("info[name]"   , this.postFiles_cache[0].name);
+    fd.append("info[size]"   , this.postFiles_cache[0].size);
+    fd.append("info[type]"   , this.postFiles_cache[0].type);
+    fd.append("info[modi]"   , this.postFiles_cache[0].lastModified);
+    fd.append("info[date]"   , this.postFiles_cache[0].lastModifiedDate);
+    // fd.append("info[width]"  , this.postFiles_cache[0].lastModifiedDate);
+    // fd.append("info[height]" , this.postFiles_cache[0].lastModifiedDate);
     
-    var img = viewListElement.querySelector(".picture");
+    var img = viewListElement.querySelector("."+ this.options.dom.img);
     var rotate = (img.getAttribute("data-rotate")) ? img.getAttribute("data-rotate") : "";
     fd.append("info[rotate]" , rotate);
     fd.append("info[width]"  , img.getAttribute("data-width"));
     fd.append("info[height]" , img.getAttribute("data-height"));
 
+    // trim
+    var parent = img.parentNode;
+    var trim_area = parent.querySelector("."+this.options.dom.trim_area);
+    var top_left     = parent.querySelector("[data-type='top-left']");
+    // var bottom_right = parent.querySelector("[data-type='bottom-right']");
+    var imgSize      = this.getImageSize(img);
+    if(trim_area.getAttribute("data-visible") == 1){
+      // var w = Number(img.getAttribute("data-width"));
+      // var h = Number(img.getAttribute("data-height"));
+      // var rate,x1,y1,x2,y2,imgx,imgY;
+      // if(w > h){
+      //   rate = w / trim_area.offsetWidth;
+      //   imgx = 0;
+      //   imgY = 
+      // }
+      // else{
+      //   rate = h / trim_area.offsetHeight;
+      // }
+      
+      // var trim_box = parent.querySelector("."+this.options.dom.trim_box);
+console.log(top_left.offsetTop+"/"+imgSize.top +"/"+imgSize.rate);
+      fd.append("trim[mode]"   , "on");
+      fd.append("trim[top]"    , (top_left.offsetTop - imgSize.top)    / imgSize.rate);
+      fd.append("trim[left]"   , (top_left.offsetLeft - imgSize.left)  / imgSize.rate);
+      fd.append("trim[width]"  , imgSize.width  / imgSize.rate);
+      fd.append("trim[height]" , imgSize.height / imgSize.rate);
+      // fd.append("trim[top]"    , imgSize.top);
+      // fd.append("trim[left]"   , imgSize.left);
+      // fd.append("trim[width]"  , imgSize.width);
+      // fd.append("trim[height]" , imgSize.height);
+    }
+    // else{
+    //   fd.append("trim[mode]"   , "off");
+    // }
+    
     var lists = this.getEditImageLists();
     if(!lists.length){return;}
 
@@ -708,46 +776,59 @@
   };
 
 
-  // Preview Resize -----
-  $$.prototype.resize_pointer_target  = null;
-  $$.prototype.resize_pointer_parent  = null;
-  $$.prototype.resize_pointer_imgSize = null;
+  // Preview Trim -----
+  $$.prototype.trim_pointer_target  = null;
+  $$.prototype.trim_pointer_parent  = null;
+  $$.prototype.trim_pointer_imgSize = null;
 
-  $$.prototype.resize_pointer_down = function(e){
+  $$.prototype.trim_pointer_down = function(e){
     var target = e.target;
     if(!target){return}
-    if(target.className !== this.options.dom.resize_pointer){return}
-    this.resize_pointer_target  = target;
-    this.resize_pointer_parent  = __upperSelector(target , ["."+this.options.dom.li]);
-    var img = this.resize_pointer_parent.querySelector("."+this.options.dom.img);
-    this.resize_pointer_imgSize = this.getImageSize(img);
+    if(target.className !== this.options.dom.trim_pointer){return}
+    this.trim_pointer_target  = target;
+    this.trim_pointer_parent  = __upperSelector(target , ["."+this.options.dom.li]);
+    var img = this.trim_pointer_parent.querySelector("."+this.options.dom.img);
+    this.trim_pointer_imgSize = this.getImageSize(img);
     target.setAttribute("data-target","1");
   };
-  $$.prototype.resize_pointer_move = function(e){
-    if(this.resize_pointer_target  === null
-    || this.resize_pointer_imgSize === null
-    || this.resize_pointer_parent  === null){return}
-    this.set_resize_popinter_target(this.resize_pointer_target , this.resize_pointer_parent , this.resize_pointer_imgSize , e.pageX , e.pageY);
+  $$.prototype.trim_pointer_move = function(e){
+    if(this.trim_pointer_target  === null
+    || this.trim_pointer_imgSize === null
+    || this.trim_pointer_parent  === null){return}
+    this.set_trim_pointer_target(this.trim_pointer_target , this.trim_pointer_parent , this.trim_pointer_imgSize , e.pageX , e.pageY);
   }
 
-  $$.prototype.set_resize_popinter_target = function(target,parent,imgSize,px,py){
+  $$.prototype.set_trim_pointer_target = function(target,parent,imgSize,px,py){
     var borderWidth = 2*2;
     var x = px - parent.offsetLeft;
-    x = (x < imgSize.left) ? imgSize.left : x;
-    x = (x > imgSize.left + imgSize.width - borderWidth) ? imgSize.left + imgSize.width - borderWidth : x;
     var y = py - parent.offsetTop;
-    y = (y < imgSize.top) ? imgSize.top : y;
-    y = (y > imgSize.top + imgSize.height - borderWidth) ? imgSize.top + imgSize.height - borderWidth : y;
+    var rotate = parent.querySelector("."+this.options.dom.img).getAttribute("data-rotate");
+    // 縦長
+    if(rotate == 90 || rotate == 270){
+      x = (x < imgSize.top) ? imgSize.top : x;
+      x = (x > imgSize.top + imgSize.height - borderWidth) ? imgSize.top + imgSize.height - borderWidth : x;
+      y = (y < imgSize.left) ? imgSize.left : y;
+      y = (y > imgSize.left + imgSize.width - borderWidth) ? imgSize.left + imgSize.width - borderWidth : y;
+    }
+    // 横長
+    else{
+      x = (x < imgSize.left) ? imgSize.left : x;
+      x = (x > imgSize.left + imgSize.width - borderWidth) ? imgSize.left + imgSize.width - borderWidth : x;
+      y = (y < imgSize.top) ? imgSize.top : y;
+      y = (y > imgSize.top + imgSize.height - borderWidth) ? imgSize.top + imgSize.height - borderWidth : y;
+    }
+    
+    
     target.style.setProperty("top"  , y + "px" , "");
     target.style.setProperty("left" , x + "px" , "");
 
     // interlocking
     var parent = __upperSelector(target , ["."+this.options.dom.li]);
-    this.set_resize_popinter_interlocking(target , parent , x , y);
-    this.set_resize_popinter_area(parent);
+    this.set_trim_popinter_interlocking(target , parent , x , y);
+    this.set_trim_popinter_area(parent);
   };
 
-  $$.prototype.set_resize_popinter_interlocking = function(target , parent , x , y){
+  $$.prototype.set_trim_popinter_interlocking = function(target , parent , x , y){
     var type = target.getAttribute("data-type");
     switch(type){
       case "top-left":
@@ -772,8 +853,8 @@
     elm_y.style.setProperty("top"  , y + "px" , "");
   };
 
-  $$.prototype.set_resize_popinter_area = function(parent){
-    var box = parent.querySelector("."+this.options.dom.resize_box);
+  $$.prototype.set_trim_popinter_area = function(parent){
+    var box = parent.querySelector("."+this.options.dom.trim_box);
     if(!box){return}
 
     var top_left     = parent.querySelector("[data-type='top-left']");
@@ -785,9 +866,9 @@
     box.style.setProperty("width"  , (top_right.offsetLeft  - top_left.offsetLeft) + "px" , "");
     box.style.setProperty("height" , (bottom_left.offsetTop - top_left.offsetTop) + "px" , "");
   };
-  $$.prototype.get_resize_popinter_area = function(pic){
+  $$.prototype.get_trim_popinter_area = function(pic){
     if(!pic){return}
-    var area = pic.querySelector("."+this.options.dom.resize_area);
+    var area = pic.querySelector("."+this.options.dom.trim_area);
     var img  = pic.querySelector("."+this.options.dom.img);
     var w    = Number(img.getAttribute("data-width"));
     var h    = Number(img.getAttribute("data-height"));
@@ -796,25 +877,107 @@
     var rotate = img.getAttribute("data-rotate");
     rotate = (rotate) ? rotate : 0;
     return {
-      left   : area.offsetLeft / rate,
-      top    : area.offsetTop / rate,
-      width  : area.offsetWidth / rate,
+      left   : area.offsetLeft   / rate,
+      top    : area.offsetTop    / rate,
+      width  : area.offsetWidth  / rate,
       height : area.offsetHeight / rate,
       rotate : rotate
     };
   }
 
-
-
-  $$.prototype.resize_pointer_up = function(){
-    if(this.resize_pointer_target  === null
-    || this.resize_pointer_imgSize === null
-    || this.resize_pointer_parent  === null){return}
-    this.resize_pointer_target.removeAttribute("data-target");
-    this.resize_pointer_target = null;
-    this.resize_pointer_imgSize  = null;
-    this.resize_pointer_parent = null;
+  $$.prototype.trim_pointer_up = function(){
+    if(this.trim_pointer_target  === null
+    || this.trim_pointer_imgSize === null
+    || this.trim_pointer_parent  === null){return}
+    this.trim_pointer_target.removeAttribute("data-target");
+    this.trim_pointer_target = null;
+    this.trim_pointer_imgSize  = null;
+    this.trim_pointer_parent = null;
   }
+
+  // rotateの際のtrim-pointerの移動処理
+  $$.prototype.setTrimRotate_reset = function(parent , afterRotate){
+    var img = parent.querySelector("."+this.options.dom.img);
+    if(!img){return;}
+    var imgSize = this.getImageSize(img);
+    if(!imgSize){return}
+    var borderMargin = 2*2;
+
+    var top_left     = parent.querySelector("[data-type='top-left']");
+    var top_right    = parent.querySelector("[data-type='top-right']");
+    var bottom_left  = parent.querySelector("[data-type='bottom-left']");
+    var bottom_right = parent.querySelector("[data-type='bottom-right']");
+
+    // 回転値
+    if(afterRotate == 90 || afterRotate == 270){
+      top_left.style.setProperty("left"     , imgSize.top + "px" , "");
+      top_left.style.setProperty("top"      , imgSize.left  + "px" , "");
+      top_right.style.setProperty("left"    , (imgSize.top + imgSize.height - borderMargin) + "px" , "");
+      top_right.style.setProperty("top"     , imgSize.left  + "px" , "");
+      bottom_left.style.setProperty("left"  , imgSize.top + "px" , "");
+      bottom_left.style.setProperty("top"   , (imgSize.left + imgSize.width - borderMargin) + "px" , "");
+      bottom_right.style.setProperty("left" , (imgSize.top + imgSize.height - borderMargin) + "px" , "");
+      bottom_right.style.setProperty("top"  , (imgSize.left + imgSize.width - borderMargin) + "px" , "");
+    }
+
+    // 正常値
+    else{
+      top_left.style.setProperty("left"     , imgSize.left + "px" , "");
+      top_left.style.setProperty("top"      , imgSize.top  + "px" , "");
+      top_right.style.setProperty("left"    , (imgSize.left + imgSize.width - borderMargin) + "px" , "");
+      top_right.style.setProperty("top"     , imgSize.top  + "px" , "");
+      bottom_left.style.setProperty("left"  , imgSize.left + "px" , "");
+      bottom_left.style.setProperty("top"   , (imgSize.top + imgSize.height - borderMargin) + "px" , "");
+      bottom_right.style.setProperty("left" , (imgSize.left + imgSize.width - borderMargin) + "px" , "");
+      bottom_right.style.setProperty("top"  , (imgSize.top + imgSize.height - borderMargin) + "px" , "");
+    }
+    this.set_trim_popinter_area(parent);
+
+  }
+//   $$.prototype.setTrimRotate = function(parent , beforeRotate , afterRotate){
+// // console.log(li);
+// // console.log(rotate);
+//     var top_left     = parent.querySelector("[data-type='top-left']");
+//     var top_right    = parent.querySelector("[data-type='top-right']");
+//     var bottom_left  = parent.querySelector("[data-type='bottom-left']");
+//     var bottom_right = parent.querySelector("[data-type='bottom-right']");
+
+//     var mode = this.checkRotateDeg(beforeRotate , afterRotate);
+// // console.log(mode);
+
+//     switch(mode){
+//       case -90:
+//         var xy1 = {x : top_left.offsetLeft     , y : top_left.offsetTop};
+//         var xy2 = {x : top_right.offsetLeft    , y : top_right.offsetTop};
+//         var xy3 = {x : bottom_left.offsetLeft  , y : bottom_left.offsetTop};
+//         var xy4 = {x : bottom_right.offsetLeft , y : bottom_right.offsetTop};
+
+//         top_left.style.setProperty("left"     , xy1.y + "px" , "");
+//         top_left.style.setProperty("top"      , xy1.x + "px" , "");
+//         top_right.style.setProperty("left"    , xy3.y + "px" , "");
+//         top_right.style.setProperty("top"     , xy3.x + "px" , "");
+
+//         bottom_left.style.setProperty("left"  , xy2.y + "px" , "");
+//         bottom_left.style.setProperty("top"   , xy2.x + "px" , "");
+//         bottom_right.style.setProperty("left" , xy4.y + "px" , "");
+//         bottom_right.style.setProperty("top"  , xy4.x + "px" , "");
+//         break;
+//     }
+
+//     this.set_trim_popinter_area(parent);
+
+//   };
+  
+
+  // 回転の前後で何度回転したかを算出(0->270:-90 , 180->270:)
+  $$.prototype.checkRotateDeg = function(beforeRotate , afterRotate){
+    var diff = afterRotate - beforeRotate;
+    // 左回転
+    diff = (diff >  180) ? beforeRotate - afterRotate + 180 : diff;
+    // 右回転
+    diff = (diff < -180) ? beforeRotate - afterRotate + 180 : diff;
+    return diff;
+  };
 
   
   return $$;

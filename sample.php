@@ -27,20 +27,26 @@ function savePost_and_json(){
   // 拡張子
   $ext = pathinfo($filename)["extension"];
 
+  // EXIFデータを取得
+  $exif = exif_read_data($_FILES["imageFile"]["tmp_name"]);
+
   // 実データを格納
   $imagePath = $savePath.".".$ext;
   move_uploaded_file($_FILES["imageFile"]["tmp_name"] , $imagePath);
 
-  // EXIFデータを取得
-  $exif = exif_read_data($imagePath);
+  // saveデータ取得
   $json_data = array(
     "id" => $_REQUEST["id"],
     "filename" => $filename,
     "extension" => $ext,
     "date" => $time,
+    "info" => $_REQUEST["info"],
+    "trim" => (isset($_REQUEST["trim"])) ? $_REQUEST["trim"] : null,
+
     "postData" => $_FILES["imageFile"],
     "exif" => $exif
   );
+
 
   // EXIFデータ保存
   $exifPath = $savePath.".json";
