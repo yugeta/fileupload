@@ -327,9 +327,9 @@
   // trim-control
   $$.prototype.setTrimPreview = function(img){
 
-    var border_size = 2 * 2;
-    var w = img.getAttribute("data-width");
-    var h = img.getAttribute("data-height");
+    // var border_size = 2 * 2;
+    // var w = img.getAttribute("data-width");
+    // var h = img.getAttribute("data-height");
 
     var imgSize = this.getImageSize(img);
     if(!imgSize){return}
@@ -347,7 +347,6 @@
     var trim_relative = document.createElement("div");
     trim_relative.className = this.options.dom.trim_relative;
     this.setElementStyle_relative(trim_relative , img);
-    
     trim_area.appendChild(trim_relative);
 
 
@@ -929,8 +928,8 @@
   $$.prototype.setElementStyle_relative = function(trim_relative , img){
     var rotate = img.getAttribute("data-rotate");
 
-    var w = img.getAttribute("data-width");
-    var h = img.getAttribute("data-height");
+    var w = Number(img.getAttribute("data-width"));
+    var h = Number(img.getAttribute("data-height"));
     var imgSize = this.getImageSize(img);
 
     // 回転：横
