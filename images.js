@@ -656,7 +656,6 @@
     var top_left     = parent.querySelector("[data-type='top-left']");
     var imgSize      = this.getImageSize(img);
     if(trim_area.getAttribute("data-visible") == 1){
-      fd.append("trim[mode]"   , "on");
       fd.append("trim[top]"    , top_left.offsetTop  / imgSize.rate);
       fd.append("trim[left]"   , top_left.offsetLeft / imgSize.rate);
       fd.append("trim[width]"  , imgSize.width       / imgSize.rate);
@@ -761,24 +760,48 @@
   $$.prototype.trim_pointer_cursor   = null;
   $$.prototype.trim_pointer_parent   = null;
   $$.prototype.trim_pointer_imgSize  = null;
+  $$.prototype.trim_box = {
+    target   : null,
+    position : null,
+    cursor   : null
+  };
 
   $$.prototype.trim_pointer_down = function(e){
     var target = e.target;
     if(!target){return}
-    if(target.className !== this.options.dom.trim_pointer){return}
-    this.trim_pointer_target   = target;
-    this.trim_pointer_position = {x:target.offsetLeft , y:target.offsetTop};
-    this.trim_pointer_cursor   = {x:e.pageX , y:e.pageY}
-    this.trim_pointer_parent   = __upperSelector(target , ["."+this.options.dom.li]);
-    var img = this.trim_pointer_parent.querySelector("."+this.options.dom.img);
-    this.trim_pointer_imgSize  = this.getImageSize(img);
-    target.setAttribute("data-target","1");
+
+    // pointer
+    if(target.className === this.options.dom.trim_pointer){
+      this.trim_pointer_target   = target;
+      this.trim_pointer_position = {x:target.offsetLeft , y:target.offsetTop};
+      this.trim_pointer_cursor   = {x:e.pageX , y:e.pageY}
+      this.trim_pointer_parent   = __upperSelector(target , ["."+this.options.dom.li]);
+      var img = this.trim_pointer_parent.querySelector("."+this.options.dom.img);
+      this.trim_pointer_imgSize  = this.getImageSize(img);
+      target.setAttribute("data-target","1");
+    }
+
+    // trim-box
+    else if(target.className === this.options.dom.trim_box){
+      this.trim_box.target   = target;
+      this.trim_box.position = {x:target.offsetLeft , y:target.offsetTop};
+      this.trim_box.cursor   = {x:e.pageX , y:e.pageY}
+    }
+    
   };
   $$.prototype.trim_pointer_move = function(e){
-    if(this.trim_pointer_target  === null
-    || this.trim_pointer_imgSize === null
-    || this.trim_pointer_parent  === null){return}
-    this.set_trim_pointer_target(this.trim_pointer_target , this.trim_pointer_parent , this.trim_pointer_imgSize , e.pageX , e.pageY);
+    // pointer
+    if(this.trim_pointer_target
+    && this.trim_pointer_imgSize
+    && this.trim_pointer_parent){
+      this.set_trim_pointer_target(this.trim_pointer_target , this.trim_pointer_parent , this.trim_pointer_imgSize , e.pageX , e.pageY);
+    }
+
+    // trim-box
+    else if(this.trim_box.target){
+      this.set_trim_box_control(e.pageX , e.pageY);
+    }
+    
   }
 
   $$.prototype.set_trim_pointer_target = function(target,parent,imgSize,px,py){
@@ -870,15 +893,28 @@
   }
 
   $$.prototype.trim_pointer_up = function(){
-    if(this.trim_pointer_target  === null
-    || this.trim_pointer_imgSize === null
-    || this.trim_pointer_parent  === null){return}
-    this.trim_pointer_target.removeAttribute("data-target");
-    this.trim_pointer_target = null;
-    this.trim_pointer_position = null;
-    this.trim_pointer_cursor = null;
-    this.trim_pointer_imgSize  = null;
-    this.trim_pointer_parent = null;
+    // pointer
+    if(this.trim_pointer_target
+    && this.trim_pointer_imgSize
+    && this.trim_pointer_parent){
+      this.trim_pointer_target.removeAttribute("data-target");
+      this.trim_pointer_target = null;
+      this.trim_pointer_position = null;
+      this.trim_pointer_cursor = null;
+      this.trim_pointer_imgSize  = null;
+      this.trim_pointer_parent = null;
+    }
+    
+    // box
+    else if(this.trim_box.target
+    && this.trim_box.position
+    && this.trim_box.cursor){
+      this.trim_box = {
+        target   : null,
+        position : null,
+        cursor   : null
+      };
+    }
   }
 
   // rotateの際のtrim-pointerの移動処理
@@ -961,6 +997,35 @@
       }
     }
   };
+
+  $$.prototype.set_trim_box_control = function(px,py){
+    var target = this.trim_box.target;
+    if(!target){return}
+    var x = this.trim_box.position.x - (this.trim_box.cursor.x - px);
+    var y = this.trim_box.position.y - (this.trim_box.cursor.y - py);
+    x = (x < 0) ? 0 : x;
+    y = (y < 0) ? 0 : y;
+    x = (x + target.offsetWidth  > target.parentNode.offsetWidth)  ? target.parentNode.offsetWidth  - target.offsetWidth  : x;
+    y = (y + target.offsetHeight > target.parentNode.offsetHeight) ? target.parentNode.offsetHeight - target.offsetHeight : y;
+    target.style.setProperty("left" , x + "px" , "");
+    target.style.setProperty("top"  , y + "px" , "");
+
+    // pointer
+    var parent       = target.parentNode;
+    var top_left     = parent.querySelector("[data-type='top-left']");
+    var top_right    = parent.querySelector("[data-type='top-right']");
+    var bottom_left  = parent.querySelector("[data-type='bottom-left']");
+    var bottom_right = parent.querySelector("[data-type='bottom-right']");
+
+    top_left.style.setProperty("top"   , y + "px","");
+    top_left.style.setProperty("left"  , x + "px","");
+    top_right.style.setProperty("top"  , y + "px","");
+    top_right.style.setProperty("left" , (x + target.offsetWidth) + "px","");
+    bottom_left.style.setProperty("top"  , (y + target.offsetHeight) + "px","");
+    bottom_left.style.setProperty("left" , x + "px","");
+    bottom_right.style.setProperty("top"  , (y + target.offsetHeight) + "px","");
+    bottom_right.style.setProperty("left" , (x + target.offsetWidth) + "px","");
+  }
 
   // 回転の前後で何度回転したかを算出(0->270:-90 , 180->270:)
   $$.prototype.checkRotateDeg = function(beforeRotate , afterRotate){

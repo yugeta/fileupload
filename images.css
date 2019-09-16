@@ -242,6 +242,7 @@
   padding:0;
   border:0;
   font-size:0;
+  cursor:all-scroll;
 }
 .fileUpload-image-bg .trim-box:before{
   content:"";
@@ -254,6 +255,9 @@
   padding:0;
   border:2px solid white;
   font-size:0;
+}
+.fileUpload-image-bg .trim-box:hover:before{
+  border:2px solid red;
 }
 .fileUpload-image-bg .trim-pointer{
   position:absolute;
