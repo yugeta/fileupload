@@ -7,6 +7,8 @@ MYNT-File-Uploader
 # Version
 - Images.js
   * ver 1.0
+  * ver 1.1 : image-trim
+  * ver 1.2 : image-orientation
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様
@@ -20,5 +22,27 @@ MYNT-File-Uploader
 
 
 # Howto
-- "image-sample.html"を参照
+- image-upload
+  1. headタグ内にライブラリファイルを設置
+    <script src="images.js"></script>
+    <script src="exif.js"></script>
+
+  2. body下段に実行コマンドを設置
+    <script>
+      new $$fileupload({
+        url : "sample.php",
+        querys       : {
+          exit : true,
+          size : 300
+        },
+        btn_selector : "#btn",
+        file_select  : function(res , options){},
+        post_success : function(res , options){console.log(res);},
+        post_finish : function(res , options){console.log("finished !!!");},
+        post_error : function(res , options){console.log(res);}
+      });
+    </script>
+
+  * "image-sample.html"参照
+  * ライブラリ内の"__options"変数は全て送り値として変更することが可能です。
 
