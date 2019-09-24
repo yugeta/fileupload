@@ -272,9 +272,18 @@
   left:0px; */
   border-radius:50%;
   transform:translate(-8px,-8px);
-  cursor:all-scroll;
+/*   cursor:all-scroll; */
   z-index:10000;
 }
+.fileUpload-image-bg .trim-pointer[data-type="top-left"],
+.fileUpload-image-bg .trim-pointer[data-type="bottom-right"]{
+  cursor:nwse-resize;
+}
+.fileUpload-image-bg .trim-pointer[data-type="top-right"],
+.fileUpload-image-bg .trim-pointer[data-type="bottom-left"]{
+  cursor:nesw-resize;
+}
+
 .fileUpload-image-bg .trim-pointer:hover{
   /* border:2px solid red;
   background-color:rgba(255,0,0,0.5); */
@@ -284,6 +293,6 @@
   /* border:2px solid green;
   background-color:rgba(0,255,0,0.5); */
   /* background-color:green */
-  background-color:rgba(0,255,0,0.5);
+/*   background-color:rgba(0,255,0,0.5); */
 }
 
