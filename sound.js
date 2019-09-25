@@ -1,4 +1,4 @@
-;$$fileupload_image = (function(){
+;$$fileupload_sound = (function(){
 
   // 起動scriptタグを選択
   var __currentScriptTag = (function(){
@@ -97,7 +97,7 @@
     css_path      : null, // 表示系cssの任意指定（デフォルト(null)は起動スクリプトと同一階層）
     file_multi    : true, // 複数ファイルアップロード対応 [ true : 複数  , false : 1つのみ]
     // extensions    : ["jpg","jpeg","png","gif","svg"], // 指定拡張子一覧（必要なもののみセット可能）
-    contentTypes  : ["image/gif" , "image/jpeg" , "image/png"],
+    contentTypes  : ["audio/mpeg"], // mp3
     img_rotate_button : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
     img_delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
     img_trim_button   : null,
@@ -189,7 +189,7 @@
     if(!head){return;}
     var css  = document.createElement("link");
     css.rel  = "stylesheet";
-    css.href = (this.options.css_path !== null) ? this.options.css_path : this.options.currentPath + "images.css";
+    css.href = (this.options.css_path !== null) ? this.options.css_path : this.options.currentPath + "sound.css";
     head[0].appendChild(css);
   };
 
@@ -230,6 +230,20 @@
     }).bind(this));
     document.body.appendChild(inp);
 
+  };
+
+  $$.prototype.convert_extension2contenType = function(extension){
+    switch(extension){
+      case "jpg":
+      case "jpeg":
+      break;
+      case "png":
+      break;
+      case "gif":
+      break;
+      case "mp3":
+      break;
+    }
   };
   
   // [初期設定] データ読み込みボタンclickイベント処理

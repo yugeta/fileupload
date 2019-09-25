@@ -6,9 +6,10 @@ MYNT-File-Uploader
 
 # Version
 - Images.js
-  * ver 1.0
+  * ver 1.0 : image
   * ver 1.1 : image-trim
   * ver 1.2 : image-orientation
+  * ver 1.3 : music
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様

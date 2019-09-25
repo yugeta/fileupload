@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MYNT-FileUploader</title>
+  <script src="sound.js"></script>
+</head>
+<body>
+  <h1>MYNT-File-Uploader (music:mp3)</h1>
+  <button id="btn" type="button">pickup-file</button>
+  <input type="text" name="test">
+
+
+<script>
+new $$fileupload_sound({
+  url : "http://localhost/tools/fileupload/sample_sound.php",
+  querys       : {
+    exit : true,
+    size : 300
+  },
+  extensions    : ["mp3"], // 指定拡張子一覧（必要なもののみセット可能）
+  btn_selector : "#btn",
+  file_select  : function(res , options){console.log(res)},
+});
+</script>
+</body>
+</html>
