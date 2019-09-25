@@ -68,6 +68,14 @@
     }
   };
 
+  var __template = null;
+
+  // 起動scriptタグを選択
+  var __currentScriptTag = (function(){
+    var scripts = document.getElementsByTagName("script");
+    return __currentScriptTag = scripts[scripts.length-1].src;
+  })();
+
   // [共通関数] JS読み込み時の実行タイミング処理（body読み込み後にJS実行する場合に使用）
 	var __construct = function(){
     switch(document.readyState){
@@ -84,14 +92,15 @@
 
     this.replaceOptions(options);
 
-    // set-css
+    // setting
     this.setCss();
+    this.setTemp();
 
     this.options.cacheTime = (+new Date());
 
     // make iframe
-		var iframe = this.makeIframe();
-    this.setIframeInner(iframe);
+		// var iframe = this.makeIframe();
+    this.setInnerForm(iframe);
 
 		// upload-button
 		this.setButton(iframe);
@@ -105,7 +114,7 @@
     form_action   : "index.php",   // form送信先action値
     input_name    : "uploadFiles", // type=fileのname値(cgi)
     view_bg_class : "fileUpload-image-bg",            // 画像編集用モードのBG(base)要素のclass名
-    css_path      : "mynt/lib/js/fileupload/images.css",
+    css_path      : "mynt/lib/js/fileupload/images.css", // nullの場合はjsと同じ階層、同じフィアル名.cssを自動で読み込む
     file_multi    : true,          // 複数ファイルアップロード対応 [ true : 複数  , false : 1つのみ]
     extensions    : ["jpg","jpeg","png","gif","svg"], // 指定拡張子一覧
     hiddens       : {},            // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
@@ -124,24 +133,54 @@
 
   // [初期設定] 基本CSSセット
   $$.prototype.setCss = function(){
+    // var head = document.getElementsByTagName("head");
+    // if(!head){return;}
+    // var css  = document.createElement("link");
+    // css.rel  = "stylesheet";
+    // css.href = this.options.css_path;
+    // head[0].appendChild(css);
     var head = document.getElementsByTagName("head");
-    if(!head){return;}
+    var base = (head) ? head[0] : document.body;
+    var current_pathinfo = __urlinfo(__currentScriptTag);
     var css  = document.createElement("link");
     css.rel  = "stylesheet";
-    css.href = this.options.css_path;
-    head[0].appendChild(css);
+    var target_css = current_pathinfo.dir + current_pathinfo.file.replace(".js",".css");
+    var query = [];
+    for(var i in current_pathinfo.query){
+      query.push(i);
+    }
+    css.href = target_css +"?"+ query.join("");
+    base.appendChild(css);
   };
 
-  // [初期設定] iframeタグ作成処理
-  $$.prototype.makeIframe = function(){
-    var iframe = document.createElement("iframe");
-    iframe.id  = "iframe_" + this.options.cacheTime;
-    iframe.src = this.options.iframe_src;
-    iframe.style.setProperty("display","none","");
-    __event(iframe , "load" , (function(iframe,e){this.setIframeInner(iframe)}).bind(this,iframe));
-    document.body.appendChild(iframe);
-    return iframe;
+  // [初期設定] テンプレートhtmlをセット
+  $$.prototype.setTemp = function(){
+    if(__template !== null){return}
+    var current_pathinfo = __urlinfo(__currentScriptTag);
+    var target_html = current_pathinfo.dir + current_pathinfo.file.replace(".js",".html");
+    new $$ajax({
+      url : target_html,
+    method : "get",
+    query : {
+      exit : true
+    },
+    onSuccess : function(res){
+      __template = res;
+    }
+    });
   };
+
+
+  // // [初期設定] iframeタグ作成処理
+  // $$.prototype.makeIframe = function(){
+  //   var iframe = document.createElement("iframe");
+  //   iframe.id  = "iframe_" + this.options.cacheTime;
+  //   iframe.src = this.options.iframe_src;
+  //   iframe.style.setProperty("display","none","");
+  //   __event(iframe , "load" , (function(iframe,e){this.setIframeInner(iframe)}).bind(this,iframe));
+  //   document.body.appendChild(iframe);
+  //   return iframe;
+  // };
 
   $$.prototype.getBase = function(){
     var lists = document.getElementsByClassName(this.options.view_bg_class);
@@ -174,7 +213,7 @@
   };
 
   // iframe内のDOMを構築（既存のDOMは破棄する）※iframeのonloadタイミングで実行
-  $$.prototype.setIframeInner = function(iframe){
+  $$.prototype.setInnerForm = function(iframe){
     var form     = document.createElement("form");
 		form.name    = "form_" + this.options.cacheTime;
 		form.method  = "POST";

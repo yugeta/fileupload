@@ -105,17 +105,3 @@ function savePost_and_json(){
   
 }
 
-function getType2Image($content){
-  switch($content){
-    case "image/jpeg":
-    
-    break;
-    case "image/png":
-
-    break;
-    case "image/gif":
-    break;
-  }
-
-}
-

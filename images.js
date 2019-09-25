@@ -76,6 +76,8 @@
     }
   };
 
+  var __template = null;
+
   // [共通関数] JS読み込み時の実行タイミング処理（body読み込み後にJS実行する場合に使用）
 	var __construct = function(){
     switch(document.readyState){
@@ -151,6 +153,7 @@
 
     // set-css
     this.setCss();
+    this.setTemp();
     
     this.setTypeFile();
 
@@ -186,11 +189,34 @@
   // [初期設定] 基本CSSセット
   $$.prototype.setCss = function(){
     var head = document.getElementsByTagName("head");
-    if(!head){return;}
+    var base = (head) ? head[0] : document.body;
+    var current_pathinfo = __urlinfo(__currentScriptTag);
     var css  = document.createElement("link");
     css.rel  = "stylesheet";
-    css.href = (this.options.css_path !== null) ? this.options.css_path : this.options.currentPath + "images.css";
-    head[0].appendChild(css);
+    var target_css = current_pathinfo.dir + current_pathinfo.file.replace(".js",".css");
+    var query = [];
+    for(var i in current_pathinfo.query){
+      query.push(i);
+    }
+    css.href = target_css +"?"+ query.join("");
+    base.appendChild(css);
+  };
+
+  // [初期設定] テンプレートhtmlをセット
+  $$.prototype.setTemp = function(){
+    if(__template !== null){return}
+    var current_pathinfo = __urlinfo(__currentScriptTag);
+    var target_html = current_pathinfo.dir + current_pathinfo.file.replace(".js",".html");
+    new $$ajax({
+      url : target_html,
+    method : "get",
+    query : {
+      exit : true
+    },
+    onSuccess : function(res){
+      __template = res;
+    }
+    });
   };
 
   $$.prototype.getBase = function(){
@@ -274,7 +300,7 @@
     bg.appendChild(ul);
 
     for(var i=0; i<files.length; i++){
-      var li = this.setImagePreview(files[i] , i);
+      var li = this.setList(files[i] , i);
       ul.appendChild(li);
     }
 
@@ -286,20 +312,15 @@
 
 
   // プレビュー表示の写真表示箇所のエレメントセット
-  $$.prototype.setImagePreview = function(fl,i){
-    var li = document.createElement("li");
-    li.className = this.options.dom.li;
+  $$.prototype.setList = function(fl,i){
+    
+
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(__template, "text/html");
+    var li = doc.querySelector("."+this.options.dom.li);
     li.setAttribute("data-num" , i);
 
-    var path = URL.createObjectURL(fl);
-
-    var img_area = document.createElement("div");
-    img_area.className = this.options.dom.img_area;
-    li.appendChild(img_area);
-
-    var img = new Image();
-    img.src = path;
-    img.className = this.options.dom.img;
+    var img = li.querySelector("."+this.options.dom.img);
     img.setAttribute("data-num"    , i);
     img.setAttribute("data-type"   , fl.type);
     img.setAttribute("data-size"   , fl.size);
@@ -313,44 +334,22 @@
       var pid = parent.getAttribute("data-num");
       this.setInfo(pid , e.target);
     }).bind(this));
-    img_area.appendChild(img);
+    var path = URL.createObjectURL(fl);
+    img.src = path;
 
-    var info = document.createElement("div");
-    info.className = this.options.dom.info;
-    li.appendChild(info);
-    var info_pixel = document.createElement("div");
-    info_pixel.className = this.options.dom.info_pixel;
-    info.appendChild(info_pixel);
-    var info_type = document.createElement("div");
-    info_type.className = this.options.dom.info_type;
-    info.appendChild(info_type);
-    var info_size = document.createElement("div");
-    info_size.className = this.options.dom.info_size;
-    info.appendChild(info_size);
-
-
-    var control = document.createElement("div");
-    control.className = this.options.dom.control;
+    var control = li.querySelector("."+this.options.dom.control);
     control.setAttribute("data-num" , i);
-    li.appendChild(control);
-    
 
-    var rotateImage = new Image();
-    rotateImage.className = this.options.dom.rotate;
+    var rotateImage = li.querySelector("."+this.options.dom.rotate);
     rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "rotate.svg";
-    control.appendChild(rotateImage);
     __event(rotateImage , "click" , (function(e){this.clickRotateButton(e)}).bind(this));
 
-    var delImage = new Image();
-    delImage.className = this.options.dom.delete;
+    var delImage = li.querySelector("."+this.options.dom.delete);
     delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
-    control.appendChild(delImage);
     __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
-    var trimImage = new Image();
-    trimImage.className = this.options.dom.trim;
+    var trimImage = li.querySelector("."+this.options.dom.trim);
     trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "crop.svg";
-    control.appendChild(trimImage);
     __event(trimImage , "click" , (function(e){this.clickTrimButton(e)}).bind(this));
 
     return li;
@@ -358,10 +357,6 @@
 
   // trim-control
   $$.prototype.setTrimPreview = function(img){
-
-    // var border_size = 2 * 2;
-    // var w = img.getAttribute("data-width");
-    // var h = img.getAttribute("data-height");
 
     var imgSize = this.getImageSize(img);
     if(!imgSize){return}
@@ -392,90 +387,44 @@
     trim_box.style.setProperty("right"  , "0px"  , "");
     trim_relative.appendChild(trim_box);
 
-//     var roll = 0;
     var img_area = li.querySelector("."+this.options.dom.img_area);
-// console.log(img_area);
-//     if(this.checkRotate(img_area.getAttribute("data-orientation") , img.getAttribute("data-rotate"))){
-//       roll = 1;
-//     }
-// console.log(img_area.getAttribute("data-orientation") +"/"+ img.getAttribute("data-rotate"));
-// console.log(roll);
 
     // pointer : top-left
     var trim_pointer_1 = document.createElement("div");
     trim_pointer_1.className = this.options.dom.trim_pointer;
     trim_pointer_1.setAttribute("data-type","top-left");
-    // if(roll === 0){
-      trim_pointer_1.style.setProperty("top"  , "0px" , "");
-      trim_pointer_1.style.setProperty("left" , "0px" , "");
-    // }
-    // else{
-    //   trim_pointer_1.style.setProperty("top"  , "0px" , "");
-    //   trim_pointer_1.style.setProperty("left" , "0px" , "");
-    // }
+    trim_pointer_1.style.setProperty("top"  , "0px" , "");
+    trim_pointer_1.style.setProperty("left" , "0px" , "");
     trim_relative.appendChild(trim_pointer_1);
 
     // pointer : top-right
     var trim_pointer_2 = document.createElement("div");
     trim_pointer_2.className = this.options.dom.trim_pointer;
     trim_pointer_2.setAttribute("data-type","top-right");
-    // if(roll === 0){
-      trim_pointer_2.style.setProperty("top"  , "0px" , "");
-      trim_pointer_2.style.setProperty("left" , imgSize.width + "px" , "");
-    // }
-    // else{
-    //   trim_pointer_2.style.setProperty("top"  , "0px" , "");
-    //   trim_pointer_2.style.setProperty("left" , imgSize.width + "px" , "");
-    // }
+    trim_pointer_2.style.setProperty("top"  , "0px" , "");
+    trim_pointer_2.style.setProperty("left" , imgSize.width + "px" , "");
     trim_relative.appendChild(trim_pointer_2);
 
     // pointer : bottom-left
     var trim_pointer_3 = document.createElement("div");
     trim_pointer_3.className = this.options.dom.trim_pointer;
     trim_pointer_3.setAttribute("data-type","bottom-left");
-    // if(roll === 0){
-      trim_pointer_3.style.setProperty("top"  , imgSize.height + "px" , "");
-      trim_pointer_3.style.setProperty("left" , "0px" , "");
-    // }
-    // else{
-    //   trim_pointer_3.style.setProperty("top"  , imgSize.height + "px" , "");
-    //   trim_pointer_3.style.setProperty("left" , "0px" , "");
-    // }
+    trim_pointer_3.style.setProperty("top"  , imgSize.height + "px" , "");
+    trim_pointer_3.style.setProperty("left" , "0px" , "");
     trim_relative.appendChild(trim_pointer_3);
 
     // pointer : bottom-right
     var trim_pointer_4 = document.createElement("div");
     trim_pointer_4.className = this.options.dom.trim_pointer;
     trim_pointer_4.setAttribute("data-type","bottom-right");
-    // if(roll === 0){
-      trim_pointer_4.style.setProperty("top" , imgSize.height + "px" , "");
-      trim_pointer_4.style.setProperty("left"  , imgSize.width  + "px" , "");
-    // }
-    // else{
-    //   trim_pointer_4.style.setProperty("top" , imgSize.height + "px" , "");
-    //   trim_pointer_4.style.setProperty("left"  , imgSize.width  + "px" , "");
-    // }
+    trim_pointer_4.style.setProperty("top" , imgSize.height + "px" , "");
+    trim_pointer_4.style.setProperty("left"  , imgSize.width  + "px" , "");
     trim_relative.appendChild(trim_pointer_4);
 
   };
 
   $$.prototype.getImageSize = function(img){
     if(!img){return}
-
-    // var img_area = __upperSelector(img , ["."+this.options.dom.img_area]);
-    // var base = {};
-    // if(this.checkRotate(img_area.getAttribute("data-orientation") , img.getAttribute("data-rotate"))){
-    //   base = {
-    //     w : Number(img.getAttribute("data-height")),
-    //     h : Number(img.getAttribute("data-width"))
-    //   };
-    // }
-    // else{
-    //   base = {
-    //     w : Number(img.getAttribute("data-width")),
-    //     h : Number(img.getAttribute("data-height"))
-    //   };
-    // }
 
     var base = {
       w : Number(img.getAttribute("data-width")),
@@ -575,7 +524,7 @@
     var num = target.parentNode.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetImage = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"'] img."+this.options.dom.img);
+    var targetImage = document.querySelector("."+this.options.dom.base+" ul li."+this.options.dom.li+"[data-num='"+num+"'] img."+this.options.dom.img);
     if(!targetImage){return;}
 
     var beforeRotateNum = targetImage.getAttribute("data-rotate");
@@ -610,7 +559,7 @@
     var num = target.parentNode.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetListBase = document.querySelector("."+this.options.dom.base+" ul li.pic[data-num='"+num+"']");
+    var targetListBase = document.querySelector("."+this.options.dom.base+" ul li."+this.options.dom.li+"[data-num='"+num+"']");
     if(!targetListBase){return;}
 
     targetListBase.parentNode.removeChild(targetListBase);
@@ -1001,26 +950,6 @@
     this.setInfo(pic.getAttribute("data-num") , img);
   };
 
-  // $$.prototype.get_trim_popinter_area = function(pic){
-  //   if(!pic){return}
-  //   var area = pic.querySelector("."+this.options.dom.trim_area);
-  //   var img  = pic.querySelector("."+this.options.dom.img);
-  //   var w    = Number(img.getAttribute("data-width"));
-  //   var h    = Number(img.getAttribute("data-height"));
-  //   var rate = (w > h) ? area.offsetWidth / w : area.offsetHeight / h;
-
-  //   var rotate = img.getAttribute("data-rotate");
-  //   rotate = (rotate) ? rotate : 0;
-
-  //   return {
-  //     left   : area.offsetLeft   / rate,
-  //     top    : area.offsetTop    / rate,
-  //     width  : area.offsetWidth  / rate,
-  //     height : area.offsetHeight / rate,
-  //     rotate : rotate
-  //   };
-  // }
-
   // trim処理の終了処理
   $$.prototype.trim_pointer_up = function(e,pagex,pagey){
     // pointer
@@ -1202,9 +1131,7 @@
   $$.prototype.setInfo = function(pid , img){
     if(pid === "undefined" || !img){return;}
 
-    var info = document.querySelector("."+this.options.dom.base+" .pic[data-num='"+pid+"']");
-    // var trim_area = info.querySelector("."+this.options.dom.trim_area);
-    // if(trim_area.getAttribute("data-visible") !== "1"){return;}
+    var info = document.querySelector("."+this.options.dom.base+" ."+this.options.dom.li+"[data-num='"+pid+"']");
 
     var w = img.getAttribute("data-width");
     var h = img.getAttribute("data-height");
