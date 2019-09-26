@@ -109,7 +109,9 @@
     flg_icon_trim    : true,
     flg_icon_comment : true,
 
+    // post-data
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
+    postStringFormat : "",  // post-string-format ["":HTML-ENTITIES , encode:encodeURIComponent(php->urldecode())]
 
     // dom構造(className)
     dom:{
@@ -464,8 +466,8 @@
         rate   : rate,
         top    : t,
         left   : 0,
-        width  : w,
-        height : h
+        width  : Math.floor(w),
+        height : Math.floor(h)
       };
     }
     // 縦長
@@ -479,8 +481,8 @@
         rate   : rate,
         top    : 0,
         left   : l,
-        width  : w,
-        height : h
+        width  : Math.floor(w),
+        height : Math.floor(h)
       };
     }
     // 正方形
@@ -489,8 +491,8 @@
         rate   : img.offsetWidth / base.w,
         top    : 0,
         left   : 0,
-        width  : img.offsetWidth,
-        height : img.offsetHeight
+        width  : Math.floor(img.offsetWidth),
+        height : Math.floor(img.offsetHeight)
       };
     }
   };
@@ -714,11 +716,11 @@
     fd.append("id"           , this.options.id);
     fd.append("num"          , (this.options.count - this.postFiles_cache.length));
     fd.append("imageFile"    , this.postFiles_cache[0]);
-    fd.append("info[name]"   , this.postFiles_cache[0].name);
-    fd.append("info[size]"   , this.postFiles_cache[0].size);
-    fd.append("info[type]"   , this.postFiles_cache[0].type);
-    fd.append("info[modi]"   , this.postFiles_cache[0].lastModified);
-    fd.append("info[date]"   , Date.parse(this.postFiles_cache[0].lastModifiedDate));
+    fd.append("info[name]"   , this.set_postStringFormat(this.postFiles_cache[0].name));
+    fd.append("info[size]"   , this.set_postStringFormat(this.postFiles_cache[0].size));
+    fd.append("info[type]"   , this.set_postStringFormat(this.postFiles_cache[0].type));
+    fd.append("info[modi]"   , this.set_postStringFormat(this.postFiles_cache[0].lastModified));
+    fd.append("info[date]"   , this.set_postStringFormat(Date.parse(this.postFiles_cache[0].lastModifiedDate)));
     
     var img = viewListElement.querySelector("."+ this.options.dom.img);
     var rotate = (img.getAttribute("data-rotate")) ? img.getAttribute("data-rotate") : "";
@@ -729,7 +731,7 @@
     // comment
     var comment = viewListElement.querySelector("."+ this.options.dom.comment_form);
     if(comment){
-      fd.append("info[comment]" , comment.value);
+      fd.append("info[comment]" , this.set_postStringFormat(comment.value));
     }
 
     // trim
@@ -805,6 +807,17 @@
       }
     }).bind(this,xhr);
     xhr.send(fd);
+  };
+
+  $$.prototype.set_postStringFormat = function(str){
+    if(typeof str !== "string"){return str;}
+    switch(this.options.postStringFormat){
+      case "encode":
+        return encodeURIComponent(str);
+
+      default:
+        return str;
+    }
   };
 
   $$.prototype.post_success = function(){
@@ -889,36 +902,69 @@
   }
 
   $$.prototype.set_trim_pointer_target = function(target,parent,imgSize,px,py){
-    // var borderWidth = 2*2;
 
     var x = this.trim_pointer_position.x - (this.trim_pointer_cursor.x - px);
     var y = this.trim_pointer_position.y - (this.trim_pointer_cursor.y - py);
     var rotate = parent.querySelector("."+this.options.dom.img).getAttribute("data-rotate");
+
+    // areaチェック
+
     // 縦長
-    // if(rotate == 90 || rotate == 270){
     var img_area = parent.querySelector("."+this.options.dom.img_area);
     if(this.checkRotate(img_area.getAttribute("data-orientation") , rotate)){
-      x = (x < 0) ? 0 : x;
-      x = (x > imgSize.height) ? imgSize.height : x;
-      y = (y < 0) ? 0 : y;
-      y = (y > imgSize.width) ? imgSize.width : y;
+      x = (x > 0) ? x : 0;
+      x = (x < imgSize.height) ? x : imgSize.height;
+      y = (y > 0) ? y : 0;
+      y = (y < imgSize.width) ? y : imgSize.width;
     }
     // 横長
     else{
-      x = (x < 0) ? 0 : x;
-      x = (x > imgSize.width) ? imgSize.width : x;
-      y = (y < 0) ? 0 : y;
-      y = (y > imgSize.height) ? imgSize.height : y;
+      x = (x > 0) ? x : 0;
+      x = (x < imgSize.width) ? x : imgSize.width;
+      y = (y > 0) ? y : 0;
+      y = (y < imgSize.height) ? y : imgSize.height;
     }
+
+    // pointer-collision
+    var pos = this.check_trim_pointer_cpllision(target,parent,x,y);
     
     
-    target.style.setProperty("top"  , y + "px" , "");
-    target.style.setProperty("left" , x + "px" , "");
+    target.style.setProperty("top"  , pos.y + "px" , "");
+    target.style.setProperty("left" , pos.x + "px" , "");
 
     // interlocking
     var parent = __upperSelector(target , ["."+this.options.dom.li]);
-    this.set_trim_popinter_interlocking(target , parent , x , y);
+    this.set_trim_popinter_interlocking(target , parent , pos.x , pos.y);
     this.set_trim_popinter_area(parent);
+  };
+
+  $$.prototype.check_trim_pointer_cpllision = function(target , parent ,x ,y){
+    var tl = parent.querySelector("[data-type='top-left'");
+    var tr = parent.querySelector("[data-type='top-right'");
+    var bl = parent.querySelector("[data-type='bottom-left'");
+    var br = parent.querySelector("[data-type='bottom-right'");
+    switch(target.getAttribute("data-type")){
+      case "top-left":
+        x = (x < tr.offsetLeft) ? x : tr.offsetLeft;
+        y = (y < bl.offsetTop)  ? y : bl.offsetTop;
+        break;
+
+      case "top-right":
+        x = (x > tl.offsetLeft) ? x : tl.offsetLeft;
+        y = (y < br.offsetTop)  ? y : br.offsetTop;
+        break;
+
+      case "bottom-left":
+        x = (x < br.offsetLeft) ? x : br.offsetLeft;
+        y = (y > tl.offsetTop)  ? y : tl.offsetTop;
+        break;
+
+      case "bottom-right":
+        x = (x > bl.offsetLeft) ? x : bl.offsetLeft;
+        y = (y > tr.offsetTop)  ? y : tr.offsetTop;
+        break;
+    }
+    return {x : x , y : y};
   };
 
   $$.prototype.set_trim_popinter_interlocking = function(target , parent , x , y){
@@ -963,6 +1009,7 @@
     box.style.setProperty("top"    , top  + "px" , "");
     box.style.setProperty("width"  , width + "px" , "");
     box.style.setProperty("height" , height + "px" , "");
+// console.log(width+" x "+height);
 
     this.setAttribute_trimSize(parent , {
       left   : left,
