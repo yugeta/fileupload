@@ -26,10 +26,13 @@ MYNT-File-Uploader
 # Howto
 - image-upload
   1. headタグ内にライブラリファイルを設置
+  ```
     <script src="images.js"></script>
     <script src="exif.js"></script>
+  ```
 
   2. body下段に実行コマンドを設置
+    ```
     <script>
       new $$fileupload({
         url : "sample.php",
@@ -44,11 +47,12 @@ MYNT-File-Uploader
         post_error : function(res , options){console.log(res);}
       });
     </script>
+    ```
 
-  * "image-sample.html"参照
-  * ライブラリ内の"__options"変数は全て送り値として変更することが可能です。
+    * "image-sample.html"参照
+    * ライブラリ内の"__options"変数は全て送り値として変更することが可能です。
 
 # php.iniの設定（下記をセットしておかないと、全角文字化けになる）
 [mbstring]
--mbstring.http_input = auto
-+mbstring.http_input = UTF-8
+  - -mbstring.http_input = auto
+  - +mbstring.http_input = UTF-8
