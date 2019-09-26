@@ -1,5 +1,6 @@
 <li class="sound" data-num="{{id}}">
   <div class="num">
+    <div class="info-title"></div>
     <img class="delete" src="delete.svg">
   </div>
   <div class="audio-area">
@@ -8,10 +9,15 @@
       <source class="source" src="">
     </audio>
   </div>
-  <div class="info-title"></div>
   <div class="info">
     <div class="info-time">{{time}}</div>
     <div class="info-type">{{content-type}}</div>
     <div class="info-size">{{content-size}}</div>
   </div>
+  <div class="control" data-num="0">
+    <img class="comment" src="comment.svg">
+  </div>
+  <div class="comment-area" data-view="0">
+      <textarea class="comment-form" placeholder="Comment"></textarea>
+    </div>
 </li>

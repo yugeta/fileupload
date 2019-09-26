@@ -101,7 +101,11 @@
     contentTypes  : ["audio/mpeg"],
     delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
 
+    // 機能（アイコン）表示フラグ
+    flg_icon_comment : true,
+
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
+    postStringFormat : "",  // post-string-format ["":HTML-ENTITIES , encode:encodeURIComponent(php->urldecode())]
 
     // dom構造(className)
     dom:{
@@ -118,6 +122,11 @@
               info_time  : "info-time",
               info_size  : "info-size",
               info_type  : "info-type",
+            control : "control",
+              comment : "comment",
+            comment_area : "comment-area",
+              comment_title : "comment-title",
+              comment_form  : "comment-form",
             
           li_submit : "submit",
             btn_submit : "button_submit",
@@ -327,7 +336,7 @@
     var info_title = li.querySelector("."+this.options.dom.info_title);
     if(info_title){
       var title = fl.name
-      title = title.replace(/\.mp3/,"");
+      // title = title.replace(/\.mp3/,"");
       info_title.textContent = title;
     }
 
@@ -349,6 +358,10 @@
     var delElement = li.querySelector("."+this.options.dom.delete_button);
     delElement.src = (this.options.delete_button !== null) ? this.options.delete_button : this.options.currentPath + "delete.svg";
     __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
+
+    var commentButton = li.querySelector("."+this.options.dom.comment);
+    commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
+    __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
 
     return li;
   };
@@ -458,6 +471,24 @@
     }
   };
 
+  $$.prototype.clickCommentButton = function(e){
+    var button = e.currentTarget;
+    var li = __upperSelector(button , ["."+this.options.dom.li]);
+    if(!li){return}
+    var comment_area = li.querySelector("."+this.options.dom.comment_area);
+
+    var comment_form = comment_area.querySelector("."+this.options.dom.comment_form);
+
+    if(comment_area.getAttribute("data-view") === "0" || comment_form.value !== ""){
+      comment_area.setAttribute("data-view","1");
+    }
+    else{
+      comment_area.setAttribute("data-view","0");
+    }
+  }
+
+  
+
   $$.prototype.postFiles_cache = [];
   $$.prototype.postFile = function(viewListElement){
 
@@ -486,14 +517,20 @@
     fd.append("id"           , this.options.id);
     fd.append("num"          , (this.options.count - this.postFiles_cache.length));
     fd.append("audioFile"    , this.postFiles_cache[0]);
-    fd.append("info[file]"   , this.postFiles_cache[0].name);
-    fd.append("info[modi]"   , this.postFiles_cache[0].lastModified);
-    fd.append("info[date]"   , this.postFiles_cache[0].lastModifiedDate);
+    fd.append("info[file]"   , this.set_postStringFormat(this.postFiles_cache[0].name));
+    fd.append("info[modi]"   , this.set_postStringFormat(this.postFiles_cache[0].lastModified));
+    fd.append("info[date]"   , this.set_postStringFormat(Date.parse(this.postFiles_cache[0].lastModifiedDate)));
     
     var audio = viewListElement.querySelector("."+ this.options.dom.audio);
-    fd.append("info[type]" , audio.getAttribute("data-type"));
-    fd.append("info[size]" , audio.getAttribute("data-size"));
-    fd.append("info[time]" , audio.getAttribute("data-time"));
+    fd.append("info[type]"   , this.set_postStringFormat((audio.getAttribute("data-type"))));
+    fd.append("info[size]"   , this.set_postStringFormat((audio.getAttribute("data-size"))));
+    fd.append("info[time]"   , this.set_postStringFormat((audio.getAttribute("data-time"))));
+
+    // comment
+    var comment = viewListElement.querySelector("."+ this.options.dom.comment_form);
+    if(comment){
+      fd.append("info[comment]" , this.set_postStringFormat(comment.value));
+    }
 
     var lists = this.getEditLists();
     if(!lists.length){return;}
@@ -548,6 +585,17 @@
     xhr.open('POST', url);
     xhr.send(fd);
 
+  };
+
+  $$.prototype.set_postStringFormat = function(str){
+    if(typeof str !== "string"){return str;}
+    switch(this.options.postStringFormat){
+      case "encode":
+        return encodeURIComponent(str);
+
+      default:
+        return str;
+    }
   };
 
   $$.prototype.post_success = function(){
