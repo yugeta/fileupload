@@ -83,6 +83,8 @@ function savePost_and_json(){
     move_uploaded_file($tmpPath , $imagePath);
   }
 
+  // $_REQUEST["info"]["comment"] = urldecode($_REQUEST["info"]["comment"]);
+  // $_REQUEST["info"]["comment"] = mb_convert_encoding($_REQUEST["info"]["comment"], "UTF-8", "ASCII"); //HTML-ENTITIES
 
   // saveデータ取得
   $json_data = array(

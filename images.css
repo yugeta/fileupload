@@ -1,3 +1,16 @@
+
+
+.fileUpload-base *,
+.fileUpload-base *:before,
+.fileUpload-base *:after {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+       -o-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+
 .fileUpload-base{
   position:fixed;
   display:block;
@@ -151,6 +164,9 @@
 }
 .fileUpload-base li .control > *:hover{
   opacity:0.5;
+}
+.fileUpload-base li .control > *[data-view="0"]{
+  display:none;
 }
 
 .fileUpload-base .img-area{
@@ -356,4 +372,53 @@
   /* background-color:green */
 /*   background-color:rgba(0,255,0,0.5); */
 }
+
+.fileUpload-base .comment-area{
+  margin-top:4px;
+  padding-bottom:4px;
+  text-align:left;
+  display:none;
+  /* height:0; */
+  /* overflow:hidden; */
+  transform:scaleY(0.0);
+  position: relative;
+}
+.fileUpload-base .comment-area:before {
+  content: "";
+  position: absolute;
+  display:inline-block;
+  bottom: 100%;
+  left: 20px;
+  margin-left: -8px;
+  border: 8px solid transparent;
+  border-bottom: 8px solid white;
+}
+
+.fileUpload-base .comment-area[data-view="1"]{
+  display:block;
+  animation: anim-comment-view 0.5s ease-in-out 1;
+  animation-fill-mode : forwards;
+  transform-origin:center top;
+}
+@keyframes anim-comment-view{
+  0%{transform:scaleY(0.0);}
+  100%{transform:scaleY(1.0);}
+}
+.fileUpload-base .comment-area .comment-title{
+  text-align:left;
+  font-size:12px;
+  color:white;
+}
+.fileUpload-base .comment-area .comment-form{
+  width:100%;
+  height:60px;
+  font-size:12px;
+  background-color:white;
+  border:1px solid white;
+  border-radius:4px;
+  resize:none;
+  padding:4px;
+  outline:none;
+}
+
 

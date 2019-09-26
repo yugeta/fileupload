@@ -98,11 +98,16 @@
     // 画像アップロード前のプレビュー用
     css_path      : null, // 表示系cssの任意指定（デフォルト(null)は起動スクリプトと同一階層）
     file_multi    : true, // 複数ファイルアップロード対応 [ true : 複数  , false : 1つのみ]
-    // extensions    : ["jpg","jpeg","png","gif","svg"], // 指定拡張子一覧（必要なもののみセット可能）
     contentTypes  : ["image/gif" , "image/jpeg" , "image/png"],
-    img_rotate_button : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
-    img_delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
-    img_trim_button   : null,
+    img_rotate_button  : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_delete_button  : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_comment_button : null, // 画像編集のコメント機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_trim_button    : null,
+
+    // 機能（アイコン）表示フラグ
+    flg_icon_rotate  : true,
+    flg_icon_trim    : true,
+    flg_icon_comment : true,
 
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
 
@@ -121,12 +126,16 @@
               info_size  : "info-size",
               info_type  : "info-type",
             control : "control",
-              rotate : "rotate",
-              trim   : "trim",
+              rotate  : "rotate",
+              trim    : "trim",
+              comment : "comment",
             trim_area : "trim-area",
               trim_relative : "trim-relative",
                 trim_box     : "trim-box",
                 trim_pointer : "trim-pointer",
+            comment_area : "comment-area",
+              comment_title : "comment-title",
+              comment_form  : "comment-form",
           
           li_submit : "submit",
             btn_submit : "button_submit",
@@ -135,10 +144,10 @@
             uploading_dot : "dot"
     },
 
-    file_select   : function(res){console.log(res)},  // ファイル選択直後の任意イベント処理
-    post_success  : function(res){console.log(res)},  // 1ファイルファイル送信完了後の任意イベント処理
-    post_finish   : function(res){console.log(res)},  // すべてのファイル送信完了後の任意イベント処理
-    post_error    : function(res){console.log(res)}   // ファイル送信エラーの時の任意イベント処理
+    file_select   : function(res){},  // ファイル選択直後の任意イベント処理
+    post_success  : function(res){},  // 1ファイルファイル送信完了後の任意イベント処理
+    post_finish   : function(res){},  // すべてのファイル送信完了後の任意イベント処理
+    post_error    : function(res){}   // ファイル送信エラーの時の任意イベント処理
   };
 
   // ----------
@@ -345,15 +354,22 @@
 
     var rotateImage = li.querySelector("."+this.options.dom.rotate);
     rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "rotate.svg";
+    rotateImage.setAttribute("data-view" , (this.options.flg_icon_rotate === true) ? 1 : 0);
     __event(rotateImage , "click" , (function(e){this.clickRotateButton(e)}).bind(this));
 
     var delImage = li.querySelector("."+this.options.dom.delete);
     delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
+    // delImage.setAttribute("data-view" , (this.options.flg_icon_del === true) ? 1 : 0);
     __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
     var trimImage = li.querySelector("."+this.options.dom.trim);
     trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "crop.svg";
+    trimImage.setAttribute("data-view" , (this.options.flg_icon_trim === true) ? 1 : 0);
     __event(trimImage , "click" , (function(e){this.clickTrimButton(e)}).bind(this));
+
+    var commentButton = li.querySelector("."+this.options.dom.comment);
+    commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
+    __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
 
     var filename = li.querySelector("."+this.options.dom.filename);
     if(filename){
@@ -597,6 +613,22 @@
     }
   };
 
+  $$.prototype.clickCommentButton = function(e){
+    var button = e.currentTarget;
+    var li = __upperSelector(button , ["."+this.options.dom.li]);
+    if(!li){return}
+    var comment_area = li.querySelector("."+this.options.dom.comment_area);
+
+    var comment_form = comment_area.querySelector("."+this.options.dom.comment_form);
+
+    if(comment_area.getAttribute("data-view") === "0" || comment_form.value !== ""){
+      comment_area.setAttribute("data-view","1");
+    }
+    else{
+      comment_area.setAttribute("data-view","0");
+    }
+  }
+
   // 
   $$.prototype.clickCancel = function(){
 
@@ -673,7 +705,6 @@
       this.clickCancel();
       return;
     }
-
     var fd   = new FormData();
     if(this.options.querys){
       for(var i in this.options.querys){
@@ -687,7 +718,7 @@
     fd.append("info[size]"   , this.postFiles_cache[0].size);
     fd.append("info[type]"   , this.postFiles_cache[0].type);
     fd.append("info[modi]"   , this.postFiles_cache[0].lastModified);
-    fd.append("info[date]"   , this.postFiles_cache[0].lastModifiedDate);
+    fd.append("info[date]"   , Date.parse(this.postFiles_cache[0].lastModifiedDate));
     
     var img = viewListElement.querySelector("."+ this.options.dom.img);
     var rotate = (img.getAttribute("data-rotate")) ? img.getAttribute("data-rotate") : "";
@@ -695,11 +726,15 @@
     fd.append("info[width]"  , img.getAttribute("data-width"));
     fd.append("info[height]" , img.getAttribute("data-height"));
 
+    // comment
+    var comment = viewListElement.querySelector("."+ this.options.dom.comment_form);
+    if(comment){
+      fd.append("info[comment]" , comment.value);
+    }
+
     // trim
     var parent = __upperSelector(img , ["."+this.options.dom.li]);
     var trim_area = parent.querySelector("."+this.options.dom.trim_area);
-    // var top_left     = parent.querySelector("[data-type='top-left']");
-    // var imgSize      = this.getImageSize(img);
     var trim_w       = img.getAttribute("data-trim-width");
     var trim_h       = img.getAttribute("data-trim-height");
     var trim_x       = img.getAttribute("data-trim-x");
@@ -710,7 +745,7 @@
       fd.append("trim[width]"  , trim_w);
       fd.append("trim[height]" , trim_h);
     }
-    
+
     var lists = this.getEditImageLists();
     if(!lists.length){return;}
 
@@ -721,6 +756,9 @@
     }
 
     var xhr = new XMLHttpRequest();
+    var url = (this.options.url) ? this.options.url : location.href;
+    xhr.open('POST', url ,true);
+    
     xhr.onreadystatechange = (function(xhr,e){
       switch(xhr.readyState){
         case 0:
@@ -766,10 +804,7 @@
           break;
       }
     }).bind(this,xhr);
-    var url = (this.options.url) ? this.options.url : location.href;
-    xhr.open('POST', url);
     xhr.send(fd);
-
   };
 
   $$.prototype.post_success = function(){
@@ -1184,5 +1219,4 @@
 
   
   return $$;
-
 })();

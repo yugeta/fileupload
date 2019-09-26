@@ -47,3 +47,7 @@ MYNT-File-Uploader
   * "image-sample.html"参照
   * ライブラリ内の"__options"変数は全て送り値として変更することが可能です。
 
+# php.iniの設定（下記をセットしておかないと、全角文字化けになる）
+[mbstring]
+-mbstring.http_input = auto
++mbstring.http_input = UTF-8
