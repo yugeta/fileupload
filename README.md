@@ -9,7 +9,8 @@ MYNT-File-Uploader
   * ver 1.0 : image
   * ver 1.1 : image-trim
   * ver 1.2 : image-orientation
-  * ver 1.3 : music
+  * ver 1.3 : sound
+  * ver 1.4 : comment-input
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様
