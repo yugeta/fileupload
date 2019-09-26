@@ -1,6 +1,19 @@
 <li class="pic" data-num="{{id}}">
+  <div class="num">
+    <span class="filename">{{filename}}</span>
+    <img class="delete" src="delete.svg">
+  </div>
   <div class="img-area">
     <img class="picture" src="">
+    <div class="trim-area" data-visible="0">
+      <div class="trim-relative">
+        <div class="trim-box"></div>
+        <div class="trim-pointer" data-type="top-left"></div>
+        <div class="trim-pointer" data-type="top-right"></div>
+        <div class="trim-pointer" data-type="bottom-left"></div>
+        <div class="trim-pointer" data-type="bottom-right"></div>
+      </div>
+    </div>
   </div>
   <div class="info">
     <div class="info-pixel">W: {{width}} H: {{height}}</div>
@@ -9,16 +22,8 @@
   </div>
   <div class="control" data-num="0">
     <img class="rotate" src="rotate.svg">
-    <img class="delete" src="delete.svg">
+    
     <img class="trim"   src="crop.svg">
   </div>
-  <div class="trim-area" data-visible="0">
-    <div class="trim-relative">
-      <div class="trim-box"></div>
-      <div class="trim-pointer" data-type="top-left"></div>
-      <div class="trim-pointer" data-type="top-right"></div>
-      <div class="trim-pointer" data-type="bottom-left"></div>
-      <div class="trim-pointer" data-type="bottom-right"></div>
-    </div>
-  </div>
+  
 </li>

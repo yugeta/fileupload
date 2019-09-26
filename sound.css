@@ -1,4 +1,4 @@
-.fileUpload-base{
+.fileUpload-base-sound{
   position:fixed;
   display:block;
   top:0;
@@ -9,22 +9,22 @@
   z-index:1000;
   overflow-y:auto;
 }
-.fileUpload-base ul,
-.fileUpload-base li{
+.fileUpload-base-sound ul,
+.fileUpload-base-sound li{
   list-style:none;
   padding:0;
   margin:0;
   border:0;
   width:100%;
 }
-.fileUpload-base ul{
+.fileUpload-base-sound ul{
   counter-reset:num;
 
   height:100%;
   /* overflow-Y:auto; */
   padding:40px 0;
 }
-.fileUpload-base ul li{
+.fileUpload-base-sound ul li{
   /* min-width:300px;
   max-width:640px;
   width:50%; */
@@ -39,18 +39,19 @@
   -ms-user-select: none;
 }
 
-.fileUpload-base ul li.sound{
+.fileUpload-base-sound ul li.sound{
   /* height:40px; */
   padding:0;
   border:0;
   /* background-color:white; */
 }
 
-.fileUpload-base ul li.sound .num{
-  height:40px;
+.fileUpload-base-sound ul li.sound .num{
+  height:24px;
   text-align:right;
+  position:relative;
 }
-.fileUpload-base ul li.sound .num:before{
+.fileUpload-base-sound ul li.sound .num:before{
   counter-increment: num;
   content: counter(num);
 
@@ -63,16 +64,18 @@
   font-size:20px;
   color:white;
   text-shadow:0px 0px 2px black;
-
+  text-align:center;
   z-index:100;
 }
-.fileUpload-base ul li.sound .num .delete{
+.fileUpload-base-sound ul li.sound .num .delete{
   width:20px;
   height:20px;
   cursor:pointer;
   filter: drop-shadow(2px 2px 2px black);
   /* display:list-item; */
-  margin:2px 20px;
+  margin:2px 8px;
+  position:absolute;
+  right:0;
 }
 
 
@@ -90,7 +93,7 @@
 
 
 /* Info */
-.fileUpload-base li .info{
+.fileUpload-base-sound li .info{
   /* position:absolute; */
   height:40px;
   font-size:12px;
@@ -103,11 +106,11 @@
   -webkit-align-items: center;
   align-items: center;
 }
-.fileUpload-base li .info > *{
+.fileUpload-base-sound li .info > *{
   padding-left  : 8px;
   padding-right : 8px;
 }
-.fileUpload-base .info-title{
+.fileUpload-base-sound .info-title{
   font-size:12px;
   color:white;
 }
@@ -117,7 +120,7 @@
 
 /* Control */
 
-.fileUpload-base li .control{
+.fileUpload-base-sound li .control{
   /* position:absolute; */
   /* top:calc(50% - 20px); */
   /* top:100%; */
@@ -139,7 +142,7 @@
   display: -webkit-flex;
   display: flex;
 } */
-.fileUpload-base li .control > *{
+.fileUpload-base-sound li .control > *{
   width:30px;
   height:30px;
   cursor:pointer;
@@ -147,11 +150,11 @@
   /* display:list-item; */
   margin:2px 20px;
 }
-.fileUpload-base li .control > *:hover{
+.fileUpload-base-sound li .control > *:hover{
   opacity:0.5;
 }
 
-.fileUpload-base .audio-area{
+.fileUpload-base-sound .audio-area{
   position:relative;
   width:100%;
   /* height:100%; */
@@ -159,7 +162,7 @@
 }
 
 
-.fileUpload-base img.audio{
+.fileUpload-base-sound img.audio{
   width:100%;
   height:100%;
   display:block;
@@ -169,7 +172,7 @@
 }
 
 /* Uploading-animation */
-.fileUpload-base li.submit button{
+.fileUpload-base-sound li.submit button{
   margin:10px 20px;
   font-size:12px;
   padding:4px 8px;
@@ -177,29 +180,29 @@
   background-color:#eee;
   border-radius:4px;
 }
-.fileUpload-base li.submit[data-uploading="1"] button{
+.fileUpload-base-sound li.submit[data-uploading="1"] button{
   display:none;
 }
 
-.fileUpload-base li.submit .uploading{
+.fileUpload-base-sound li.submit .uploading{
   display:none;
 }
-.fileUpload-base li.submit[data-uploading="1"] .uploading{
+.fileUpload-base-sound li.submit[data-uploading="1"] .uploading{
   display:inline-block;
 }
-.fileUpload-base li.submit .uploading{
+.fileUpload-base-sound li.submit .uploading{
   position:relative;
   width:128px;
   height:128px;
 }
-.fileUpload-base li.submit .uploading > .dot{
+.fileUpload-base-sound li.submit .uploading > .dot{
   position:absolute;
   width:100%;
   height:100%;
   top:0;
   left:0;
 }
-.fileUpload-base li.submit .uploading > .dot:after{
+.fileUpload-base-sound li.submit .uploading > .dot:after{
   content:"";
   position:absolute;
   left:calc(50% - 10px);
@@ -214,30 +217,30 @@
   font-size:0;
   animation: anim-circle-ex-dot 1.2s ease-in-out infinite;
 }
-.fileUpload-base li.submit .uploading > .dot:nth-child(1){transform:rotate(0deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(1):after{animation-delay: 0s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(2){transform:rotate(30deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(2):after{animation-delay: -1.1s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(3){transform:rotate(60deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(3):after{animation-delay: -1.0s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(4){transform:rotate(90deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(4):after{animation-delay: -0.9s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(5){transform:rotate(120deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(5):after{animation-delay: -0.8s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(6){transform:rotate(150deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(6):after{animation-delay: -0.7s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(7){transform:rotate(180deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(7):after{animation-delay: -0.6s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(8){transform:rotate(210deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(8):after{animation-delay: -0.5s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(9){transform:rotate(240deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(9):after{animation-delay: -0.4s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(10){transform:rotate(270deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(10):after{animation-delay: -0.3s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(11){transform:rotate(300deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(11):after{animation-delay: -0.2s;}
-.fileUpload-base li.submit .uploading > .dot:nth-child(12){transform:rotate(330deg);}
-.fileUpload-base li.submit .uploading > .dot:nth-child(12):after{animation-delay: -0.1s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(1){transform:rotate(0deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(1):after{animation-delay: 0s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(2){transform:rotate(30deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(2):after{animation-delay: -1.1s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(3){transform:rotate(60deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(3):after{animation-delay: -1.0s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(4){transform:rotate(90deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(4):after{animation-delay: -0.9s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(5){transform:rotate(120deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(5):after{animation-delay: -0.8s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(6){transform:rotate(150deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(6):after{animation-delay: -0.7s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(7){transform:rotate(180deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(7):after{animation-delay: -0.6s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(8){transform:rotate(210deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(8):after{animation-delay: -0.5s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(9){transform:rotate(240deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(9):after{animation-delay: -0.4s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(10){transform:rotate(270deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(10):after{animation-delay: -0.3s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(11){transform:rotate(300deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(11):after{animation-delay: -0.2s;}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(12){transform:rotate(330deg);}
+.fileUpload-base-sound li.submit .uploading > .dot:nth-child(12):after{animation-delay: -0.1s;}
 @keyframes anim-circle-ex-dot{
   0%{transform:scale(0.0);}
   35%{transform:scale(1.0);}

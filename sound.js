@@ -105,7 +105,7 @@
 
     // dom構造(className)
     dom:{
-      base : "fileUpload-base",
+      base : "fileUpload-base-sound",
         ul : "",
           li : "sound",
             num : "num",

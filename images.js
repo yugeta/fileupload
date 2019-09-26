@@ -111,6 +111,9 @@
       base : "fileUpload-base",
         ul : "",
           li : "pic",
+            num      : "num",
+              filename : "filename",
+              delete : "delete",
             img_area : "img-area",
               img     : "picture",
             info    : "info",
@@ -120,11 +123,11 @@
             control : "control",
               rotate : "rotate",
               trim   : "trim",
-              delete : "delete",
             trim_area : "trim-area",
               trim_relative : "trim-relative",
                 trim_box     : "trim-box",
                 trim_pointer : "trim-pointer",
+          
           li_submit : "submit",
             btn_submit : "button_submit",
             btn_cancel : "button_cancel",
@@ -352,6 +355,10 @@
     trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "crop.svg";
     __event(trimImage , "click" , (function(e){this.clickTrimButton(e)}).bind(this));
 
+    var filename = li.querySelector("."+this.options.dom.filename);
+    if(filename){
+      filename.textContent = fl.name;
+    }
     return li;
   };
 
@@ -360,9 +367,9 @@
 
     var imgSize = this.getImageSize(img);
     if(!imgSize){return}
-    var li = __upperSelector(img , ["."+this.options.dom.li]);
+    var area = __upperSelector(img , ["."+this.options.dom.li]+" ."+this.options.dom.img_area);
 
-    var trim_elm = li.querySelector("."+this.options.dom.trim_area);
+    var trim_elm = area.querySelector("."+this.options.dom.trim_area);
     if(trim_elm){
       trim_elm.parentNode.removeChild(trim_elm);
     }
@@ -370,13 +377,12 @@
     // area + relative
     var trim_area = document.createElement("div");
     trim_area.className = this.options.dom.trim_area;
-    li.appendChild(trim_area);
+    area.appendChild(trim_area);
 
     var trim_relative = document.createElement("div");
     trim_relative.className = this.options.dom.trim_relative;
     this.setElementStyle_relative(trim_relative , img);
     trim_area.appendChild(trim_relative);
-
 
     // pointer-area
     var trim_box = document.createElement("div");
@@ -387,7 +393,7 @@
     trim_box.style.setProperty("right"  , "0px"  , "");
     trim_relative.appendChild(trim_box);
 
-    var img_area = li.querySelector("."+this.options.dom.img_area);
+    // var img_area = li.querySelector("."+this.options.dom.img_area);
 
     // pointer : top-left
     var trim_pointer_1 = document.createElement("div");
@@ -556,7 +562,9 @@
     if(!confirm("アップロードリストから写真を破棄しますか？※直接撮影された写真は保存されません。")){return;}
 
     var target = e.currentTarget;
-    var num = target.parentNode.getAttribute("data-num");
+    var li = __upperSelector(target,["."+this.options.dom.li]);
+    if(!li){return;}
+    var num = li.getAttribute("data-num");
     if(num === null){return;}
 
     var targetListBase = document.querySelector("."+this.options.dom.base+" ul li."+this.options.dom.li+"[data-num='"+num+"']");
@@ -1086,6 +1094,7 @@
         trim_relative.style.setProperty("height" , "100%" , "");
       }
     }
+// console.log(imgSize.top+"/"+imgSize.left);
   };
 
   $$.prototype.set_trim_box_control = function(px,py){
