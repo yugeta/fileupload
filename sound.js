@@ -107,6 +107,11 @@
     querys        : {},   // input type="hidden"の任意値のセット(cgiに送信する際の各種データ)
     postStringFormat : "",  // post-string-format ["":HTML-ENTITIES , encode:encodeURIComponent(php->urldecode())]
 
+    // comment
+    comment : {
+      placeholder : "Comment...",
+    },
+
     // dom構造(className)
     dom:{
       base : "fileUpload-base-sound",
@@ -360,8 +365,14 @@
     __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
     var commentButton = li.querySelector("."+this.options.dom.comment);
+    commentButton.src = (this.options.img_comment_button !== null) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
     commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
+
+    var commentForm = li.querySelector("."+this.options.dom.comment_form);
+    if(commentForm){
+      commentForm.placeholder = (this.options.comment.placeholder) ? this.options.comment.placeholder : "";
+    }
 
     return li;
   };

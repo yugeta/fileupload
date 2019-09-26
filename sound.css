@@ -110,6 +110,7 @@
 .fileUpload-base-sound li .info > *{
   padding-left  : 8px;
   padding-right : 8px;
+  font-size:12px;
 }
 .fileUpload-base-sound .info-title{
   font-size:12px;
