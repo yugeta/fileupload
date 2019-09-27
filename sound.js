@@ -446,7 +446,7 @@
     var arr = [];
     if (judge == 220) {
       var num = 0;
-      for (var i=0; i<128; i++) {
+      for (var i=0; i<=127; i++) {
         if(i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
         if(id3v1[i] == 0){continue}
         arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
@@ -454,6 +454,9 @@
       }
       for(var i=0; i<arr.length; i++){
         var str = Encoding.convert(arr[i] , "UNICODE" , "SJIS");
+        str = str.replace(/\u000f/g , "");
+        str = str.replace(/^ +/g , "");
+        str = str.replace(/ +$/g , "");
         arr[i] = str;
       }
     }
