@@ -101,7 +101,8 @@
     contentTypes  : ["audio/mpeg"],
     img_rotate_button  : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
     img_delete_button  : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
-    img_comment_button : "comment.svg", // 画像編集のコメント機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_comment_button : null, // 画像編集のコメント機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_info_button    : null,
 
     // 機能（アイコン）表示フラグ
     flg_icon_comment : true,
@@ -113,6 +114,7 @@
     comment : {
       placeholder : "Comment...",
     },
+    info_area_view : true,
 
     // dom構造(className)
     dom:{
@@ -120,12 +122,13 @@
         ul : "",
           li : "sound",
             num : "num",
+              info_title : "info-title",
+              info_title_input : "info-title-input",
               delete_button : "delete",
             audio_area : "audio-area",
               audio     : "audio",
                 source  : "source",
             info    : "info",
-              info_title : "info-title",
               info_time  : "info-time",
               info_size  : "info-size",
               info_type  : "info-type",
@@ -133,6 +136,7 @@
 
             control : "control",
               comment_button : "comment-icon",
+              info_button : "info-icon",
             comment_area : "comment-area",
               comment_title : "comment-title",
               comment_form  : "comment-form",
@@ -332,6 +336,11 @@
     audio.setAttribute("data-type"   , fl.type);
     audio.setAttribute("data-size"   , fl.size);
 
+    var info_area = li.querySelector("."+this.options.dom.info);
+    if(info_area && this.options.info_area_view){
+      info_area.setAttribute("data-view" , this.options.info_area_view);
+    }
+
     var info_time = li.querySelector("."+this.options.dom.info_time);
     if(info_time){
       __event(audio , "loadedmetadata" , (function(info_time,e){
@@ -344,10 +353,15 @@
     
     var info_title = li.querySelector("."+this.options.dom.info_title);
     if(info_title){
-      var title = fl.name
-      // title = title.replace(/\.mp3/,"");
-      info_title.textContent = title;
+      info_title.textContent = fl.name;
     }
+    var info_title_input = li.querySelector("."+this.options.dom.info_title_input);
+    if(info_title_input){
+      var title = fl.name
+      title = title.replace(/\.mp3/,"");
+      info_title_input.value = title;
+    }
+
 
     var info_type = li.querySelector("."+this.options.dom.info_type);
     if(info_type){
@@ -355,9 +369,9 @@
     }
 
     var info_size = li.querySelector("."+this.options.dom.info_size);
+    var size = (fl.size.length <= 6) ? this.convertSize_b2k(sifl.sizeze) : this.convertSize_b2m(fl.size);
     if(info_size){
-      var size = fl.size;
-      info_size.textContent = (size.length <= 6) ? this.convertSize_b2k(size) : this.convertSize_b2m(size);
+      info_size.textContent = size;
     }
     
 
@@ -369,59 +383,81 @@
     __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
     var commentButton = li.querySelector("."+this.options.dom.comment_button);
-    commentButton.src = (typeof this.options.img_comment_button !== "undefined" || this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
+    commentButton.src = (this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
     commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
+
+    var infoButton = li.querySelector("."+this.options.dom.info_button);
+    infoButton.src = (this.options.img_info_button) ? this.options.img_info_button : this.options.currentPath + "info.svg";
+    infoButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
+    __event(infoButton , "click" , (function(e){this.clickInfoButton(e)}).bind(this));
 
     var commentForm = li.querySelector("."+this.options.dom.comment_form);
     if(commentForm){
       commentForm.placeholder = (this.options.comment.placeholder) ? this.options.comment.placeholder : "";
     }
 
-
-
     // IDv3
     var reader = new FileReader();
     reader.readAsArrayBuffer(fl);
-    reader.onload = function(e){
-      var id3v1 = (new Uint8Array(e.target.result)).slice(-128);
-// console.log(id3v1);
-      var judge = id3v1[0] + id3v1[1] + id3v1[2];
-// console.log(judge);
-      if (judge == 220) {
-        var str = "";
-        var arr = [];
-        var num = 0;
-        for (var i=0; i<=127; i++) {
-          // if (i == 33 || i == 63){str += "\n";}
-          // str += String.fromCharCode(id3v1[i]);
-          // arr.push(id3v1[i]);
-          if (i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
-          arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
-          arr[num] += String.fromCharCode(id3v1[i]);
-// console.log(id3v1[i]+",");
-          // if (i == 33 || i == 63) trackInfo.innerHTML += '<br>';
-          // trackInfo.innerHTML += String.fromCharCode(id3v1[i]);
-        }
-// console.log(str);
-// console.log(arr);
-// console.log(Encoding.convert(arr , "SJIS" , "UTF-8"));
-// console.log(Encoding.convert(str , "UNICODE" , "SJIS"));
-// console.log(unescape(str));
-// console.log(encodeURIComponent(str));
-// console.log(unescape(encodeURIComponent(str)));
-// console.log(decodeURIComponent(escape(unescape(encodeURIComponent(str)))));
-for(var i=0; i<arr.length; i++){
-  console.log(i +" : "+ Encoding.convert(arr[i] , "UNICODE" , "SJIS"));
-}
-      }
-      else{
-console.log("No - IDv3 tag.");
-      }
-    };
+    reader.onload = (function(li , filename , type , size , e){
+      var res = this.getMp3ID3Tag(e.target.result);
+      // console.log(res);
+      var tag_area = li.querySelector("."+this.options.dom.idv3);
+      var endtime = li.querySelector("."+this.options.dom.audio).getAttribute("data-time");
+      if(tag_area){
+        var htmls = [];
+        htmls.push("<b>[ ファイル情報 ]</b>");
+        htmls.push("  File : "    + filename);
+        htmls.push("  Time : "    + endtime);
+        htmls.push("  Type : "    + type);
+        htmls.push("  Size : "    + size);
 
+        if(res && res.length){
+          htmls.push("<b>[ ID3Tag情報 ]</b>");
+          htmls.push("  Title : "   + res[1]);
+          htmls.push("  Artist : "  + res[2]);
+          htmls.push("  Album : "   + res[3]);
+          htmls.push("  Date : "    + res[4]);
+          htmls.push("  Comment : " + res[5]);
+        }
+
+        // id3tag-data-set
+        tag_area.setAttribute("data-title"   , ((res[1]) ? res[1] : ""));
+        tag_area.setAttribute("data-artist"  , ((res[1]) ? res[2] : ""));
+        tag_area.setAttribute("data-album"   , ((res[1]) ? res[3] : ""));
+        tag_area.setAttribute("data-date"    , ((res[1]) ? res[4] : ""));
+        tag_area.setAttribute("data-comment" , ((res[1]) ? res[5] : ""));
+        
+        tag_area.innerHTML = htmls.join("\n");
+      }
+    }).bind(this , li , fl.name , fl.type , size);
 
     return li;
+  };
+
+  // mp3のID3タグ情報の取得
+  // [0:TAG 1:title 2:artist 3:album 4:date 5:comment 6:genre-no]
+  $$.prototype.getMp3ID3Tag = function(result){
+    if(!result){return null;}
+    if(typeof window.Encoding === "undefined"){return null;}
+    var id3v1 = (new Uint8Array(result)).slice(-128);
+    var judge = id3v1[0] + id3v1[1] + id3v1[2];
+    var arr = [];
+    if (judge == 220) {
+      var num = 0;
+      for (var i=0; i<128; i++) {
+        if(i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
+        if(id3v1[i] == 0){continue}
+        arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
+        arr[num] += String.fromCharCode(id3v1[i]);
+      }
+      for(var i=0; i<arr.length; i++){
+        var str = Encoding.convert(arr[i] , "UNICODE" , "SJIS");
+        arr[i] = str;
+      }
+    }
+    return arr;
   };
 
 
@@ -545,6 +581,20 @@ console.log("No - IDv3 tag.");
     }
   }
 
+  $$.prototype.clickInfoButton = function(e){
+    var button = e.currentTarget;
+    var li = __upperSelector(button , ["."+this.options.dom.li]);
+    if(!li){return}
+    var idv3 = li.querySelector("."+this.options.dom.idv3);
+    if(!idv3){return}
+    if(idv3.getAttribute("data-view") !== "1"){
+      idv3.setAttribute("data-view","1");
+    }
+    else{
+      idv3.setAttribute("data-view","0");
+    }
+  };
+
   
 
   $$.prototype.postFiles_cache = [];
@@ -572,9 +622,15 @@ console.log("No - IDv3 tag.");
         fd.append(i , this.options.querys[i]);
       }
     }
+    var name_input = viewListElement.querySelector("."+ this.options.dom.info_title_input);
+    if(name_input){
+      fd.append("info[name]"   , this.set_postStringFormat(name_input.value));
+    }
+
     fd.append("id"           , this.options.id);
     fd.append("num"          , (this.options.count - this.postFiles_cache.length));
     fd.append("audioFile"    , this.postFiles_cache[0]);
+    
     fd.append("info[file]"   , this.set_postStringFormat(this.postFiles_cache[0].name));
     fd.append("info[modi]"   , this.set_postStringFormat(this.postFiles_cache[0].lastModified));
     fd.append("info[date]"   , this.set_postStringFormat(Date.parse(this.postFiles_cache[0].lastModifiedDate)));
@@ -583,6 +639,14 @@ console.log("No - IDv3 tag.");
     fd.append("info[type]"   , this.set_postStringFormat((audio.getAttribute("data-type"))));
     fd.append("info[size]"   , this.set_postStringFormat((audio.getAttribute("data-size"))));
     fd.append("info[time]"   , this.set_postStringFormat((audio.getAttribute("data-time"))));
+
+    // id3tag
+    var idv3 = viewListElement.querySelector("."+ this.options.dom.idv3);
+    fd.append("id3tag[title]"   , this.set_postStringFormat(idv3.getAttribute("data-title")));
+    fd.append("id3tag[artist]"  , this.set_postStringFormat(idv3.getAttribute("data-artist")));
+    fd.append("id3tag[album]"   , this.set_postStringFormat(idv3.getAttribute("data-album")));
+    fd.append("id3tag[date]"    , this.set_postStringFormat(idv3.getAttribute("data-date")));
+    fd.append("id3tag[comment]" , this.set_postStringFormat(idv3.getAttribute("data-comment")));
 
     // comment
     var comment = viewListElement.querySelector("."+ this.options.dom.comment_form);

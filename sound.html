@@ -1,6 +1,7 @@
 <li class="sound" data-num="{{id}}">
   <div class="num">
-    <div class="info-title"></div>
+    <!-- <div class="info-title"></div> -->
+    <input class="info-title-input" />
     <img class="delete" src="delete.svg">
   </div>
   <div class="audio-area">
@@ -9,20 +10,22 @@
       <source class="source" src="">
     </audio>
   </div>
-  <div class="info">
+  <div class="info" data-view="">
     <div class="info-time">{{time}}</div>
     <div class="info-type">{{content-type}}</div>
     <div class="info-size">{{content-size}}</div>
   </div>
-  <div class="idv3-area" data-view="0"><!-- <input class="title-form" type="text" placeholder="Title" /> -->Title : {{idv3-title}}
-Album : {{idv3-album}}
-Artist : {{idv3-artist}}</div>
 
   <div class="control" data-num="0">
     <img class="comment-icon" src="comment.svg">
+    <img class="info-icon" src="info.svg">
   </div>
   
   <div class="comment-area" data-view="0">
     <textarea class="comment-form" placeholder="Comment"></textarea>
   </div>
+
+  <div class="idv3-area" data-view="0"><!-- <input class="title-form" type="text" placeholder="Title" /> -->Title : {{idv3-title}}
+    Album : {{idv3-album}}
+    Artist : {{idv3-artist}}</div>
 </li>
