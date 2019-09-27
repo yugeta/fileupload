@@ -99,7 +99,9 @@
     css_path      : null, // 表示系cssの任意指定（デフォルト(null)は起動スクリプトと同一階層）
     file_multi    : true, // 複数ファイルアップロード対応 [ true : 複数  , false : 1つのみ]
     contentTypes  : ["audio/mpeg"],
-    delete_button : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_rotate_button  : null, // 画像編集の回転機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_delete_button  : null, // 画像編集の削除機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
+    img_comment_button : "comment.svg", // 画像編集のコメント機能アイコン（デフォルト(null)は起動スクリプトと同一階層）
 
     // 機能（アイコン）表示フラグ
     flg_icon_comment : true,
@@ -127,8 +129,10 @@
               info_time  : "info-time",
               info_size  : "info-size",
               info_type  : "info-type",
+            idv3    : "idv3-area",
+
             control : "control",
-              comment : "comment",
+              comment_button : "comment-icon",
             comment_area : "comment-area",
               comment_title : "comment-title",
               comment_form  : "comment-form",
@@ -361,11 +365,11 @@
     // control.setAttribute("data-num" , i);
 
     var delElement = li.querySelector("."+this.options.dom.delete_button);
-    delElement.src = (this.options.delete_button !== null) ? this.options.delete_button : this.options.currentPath + "delete.svg";
+    delElement.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
     __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
-    var commentButton = li.querySelector("."+this.options.dom.comment);
-    commentButton.src = (this.options.img_comment_button !== null) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
+    var commentButton = li.querySelector("."+this.options.dom.comment_button);
+    commentButton.src = (typeof this.options.img_comment_button !== "undefined" || this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
     commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
 
@@ -373,6 +377,49 @@
     if(commentForm){
       commentForm.placeholder = (this.options.comment.placeholder) ? this.options.comment.placeholder : "";
     }
+
+
+
+    // IDv3
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(fl);
+    reader.onload = function(e){
+      var id3v1 = (new Uint8Array(e.target.result)).slice(-128);
+// console.log(id3v1);
+      var judge = id3v1[0] + id3v1[1] + id3v1[2];
+// console.log(judge);
+      if (judge == 220) {
+        var str = "";
+        var arr = [];
+        var num = 0;
+        for (var i=0; i<=127; i++) {
+          // if (i == 33 || i == 63){str += "\n";}
+          // str += String.fromCharCode(id3v1[i]);
+          // arr.push(id3v1[i]);
+          if (i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
+          arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
+          arr[num] += String.fromCharCode(id3v1[i]);
+// console.log(id3v1[i]+",");
+          // if (i == 33 || i == 63) trackInfo.innerHTML += '<br>';
+          // trackInfo.innerHTML += String.fromCharCode(id3v1[i]);
+        }
+// console.log(str);
+// console.log(arr);
+// console.log(Encoding.convert(arr , "SJIS" , "UTF-8"));
+// console.log(Encoding.convert(str , "UNICODE" , "SJIS"));
+// console.log(unescape(str));
+// console.log(encodeURIComponent(str));
+// console.log(unescape(encodeURIComponent(str)));
+// console.log(decodeURIComponent(escape(unescape(encodeURIComponent(str)))));
+for(var i=0; i<arr.length; i++){
+  console.log(i +" : "+ Encoding.convert(arr[i] , "UNICODE" , "SJIS"));
+}
+      }
+      else{
+console.log("No - IDv3 tag.");
+      }
+    };
+
 
     return li;
   };

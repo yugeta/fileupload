@@ -11,6 +11,7 @@ MYNT-File-Uploader
   * ver 1.2 : image-orientation
   * ver 1.3 : sound
   * ver 1.4 : comment-input
+  * ver 1.5 : sound : IDv3
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様
@@ -56,3 +57,8 @@ MYNT-File-Uploader
 [mbstring]
   - -mbstring.http_input = auto
   - +mbstring.http_input = UTF-8
+
+# ID3取得関連
+  https://github.com/creeperyang/id3-parser(未使用)
+  mp3 : https://akabeko.me/blog/memo/mp3/
+  wikipedia : https://ja.wikipedia.org/wiki/ID3%E3%82%BF%E3%82%B0

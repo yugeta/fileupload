@@ -6,7 +6,9 @@
   <script src="ajax.js"></script>
   <script src="exif.js"></script>
   <script src="images.js"></script>
+
   <script src="sound.js"></script>
+  <script src="encoding.js"></script>
 </head>
 <body>
   <h1>MYNT-File-Uploader</h1>
@@ -44,7 +46,8 @@ new $$fileupload_sound({
     exit : true,
     size : 300
   },
-  flg_icon_comment : false,
+  flg_icon_comment : true,
+  flg_icon_title : true,
   contentTypes  : ["audio/mpeg"], // 指定拡張子一覧（必要なもののみセット可能）
   btn_selector : "#btn_sound",
   file_select  : function(res , options){console.log(res)}
