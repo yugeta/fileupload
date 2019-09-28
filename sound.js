@@ -409,7 +409,7 @@
         var htmls = [];
         htmls.push("<b>[ ファイル情報 ]</b>");
         htmls.push("  File : "    + filename);
-        htmls.push("  Time : "    + endtime);
+        htmls.push("  Time : "    + this.setFormatTime(endtime , "ms"));
         htmls.push("  Type : "    + type);
         htmls.push("  Size : "    + size);
 
@@ -766,16 +766,22 @@
     return kiro + " MB";
   }
 
-  $$.prototype.setFormatTime = function(time){
+  $$.prototype.setFormatTime = function(time , mode){
 		var time2 = parseInt(time * 10 , 10) /10;
 		var m = parseInt(time2 / 60 , 10);
 		m = (m < 10) ? "0" + m.toFixed() : m.toFixed();
 		var s = parseInt(time2 % 60 , 10);
 		s = (s < 10) ? "0" + s.toFixed() : s.toFixed();
 		var ms = parseInt((time % 1) * 100 , 10);
-		ms = (ms < 10) ? "0" + ms.toFixed() : ms.toFixed();
-		return m +":"+ s +":"+ ms;
-	};
+    ms = (ms < 10) ? "0" + ms.toFixed() : ms.toFixed();
+    if(mode === "ms"){
+      return m +":"+ s;
+    }
+    else{
+      return m +":"+ s +":"+ ms;
+    }
+  };
+  
 
 
   
