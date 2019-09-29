@@ -12,6 +12,7 @@ MYNT-File-Uploader
   * ver 1.3 : sound
   * ver 1.4 : comment-input
   * ver 1.5 : sound : IDv3
+  * ver 1.6 : Existing form Correspondence.（既存のフォームに対応）
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様

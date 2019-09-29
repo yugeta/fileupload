@@ -6,6 +6,7 @@
   <script src="ajax.js"></script>
   <script src="exif.js"></script>
   <script src="images.js"></script>
+  <script src="images_exist.js"></script>
 
   <script src="sound.js"></script>
   <script src="encoding.js"></script>
@@ -23,6 +24,11 @@
     <button id="btn_sound" type="button">pickup-file (sounds)</button>
   </div>
 
+  <h2>Existing form</h2>
+  <div>
+    <input id="ex_img" type="file" name='ex_img'>
+    <div class="preview"></div>
+  </div>
 
 <script>
 new $$fileupload_image({
@@ -53,6 +59,22 @@ new $$fileupload_sound({
   btn_selector : "#btn_sound",
   file_select  : function(res , options){console.log(res)}
 });
+
+new $$fileupload({
+  url : "http://localhost/tools/fileupload/sample_image_exist.php",
+  querys       : {
+    exit : true,
+    size : 300
+  },
+  flg_icon_rotate : true,
+  flg_icon_trim    : true,
+  flg_icon_comment : true,
+  contentTypes : ["image/gif" , "image/jpeg" , "image/png"], // 指定拡張子一覧（必要なもののみセット可能）
+  btn_selector : "#btn_image",
+  file_select  : function(res , options){console.log(res)}
+});
+
+
 </script>
 </body>
 </html>

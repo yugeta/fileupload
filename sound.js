@@ -401,7 +401,7 @@
     var reader = new FileReader();
     reader.readAsArrayBuffer(fl);
     reader.onload = (function(li , filename , type , size , e){
-      var res = this.getMp3ID3Tag(e.target.result);
+      var res = this.getMp3ID3Tag(e.target.result , e.target.buffer);
       // console.log(res);
       var tag_area = li.querySelector("."+this.options.dom.idv3);
       var endtime = li.querySelector("."+this.options.dom.audio).getAttribute("data-time");
@@ -438,6 +438,38 @@
 
   // mp3のID3タグ情報の取得
   // [0:TAG 1:title 2:artist 3:album 4:date 5:comment 6:genre-no]
+  $$.prototype.getMp3IDTag = function(result , buffer){
+    if(!result){return null;}
+    if(typeof window.Encoding === "undefined"){return null;}
+    var id3v1 = (new Uint8Array(result)).slice(-128);
+    var judge = id3v1[0] + id3v1[1] + id3v1[2];
+    var arr = [];
+    if (judge == 220) {
+      var num = 0;
+      for (var i=0; i<=127; i++) {
+        if(i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
+        if(id3v1[i] == 0){continue}
+        arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
+        arr[num] += String.fromCharCode(id3v1[i]);
+      }
+      for(var i=0; i<arr.length; i++){
+        var str = Encoding.convert(arr[i] , "UNICODE" , "SJIS");
+        // var str = arr[i];
+        str = str.replace(/\u000f/g , "");
+        str = str.replace(/^ +/g , "");
+        str = str.replace(/ +$/g , "");
+        arr[i] = str;
+      }
+    }
+// console.log(new Uint8Array(buffer));
+// console.log(id3v1);
+// console.log(id3v1[0] +"+"+ id3v1[1] +"+"+ id3v1[2]+":"+id3v1.length);
+// console.log(judge);
+// console.log((new Uint8Array(result)).slice(128));
+// console.log(id3v1.length);
+
+    return arr;
+  };
   $$.prototype.getMp3ID3Tag = function(result){
     if(!result){return null;}
     if(typeof window.Encoding === "undefined"){return null;}
@@ -462,6 +494,7 @@
     }
     return arr;
   };
+
 
 
   // submit,cancel-button
