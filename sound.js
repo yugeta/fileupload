@@ -379,16 +379,16 @@
     // control.setAttribute("data-num" , i);
 
     var delElement = li.querySelector("."+this.options.dom.delete_button);
-    delElement.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
+    delElement.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "img/delete.svg";
     __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
     var commentButton = li.querySelector("."+this.options.dom.comment_button);
-    commentButton.src = (this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
+    commentButton.src = (this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "img/comment.svg";
     commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
 
     var infoButton = li.querySelector("."+this.options.dom.info_button);
-    infoButton.src = (this.options.img_info_button) ? this.options.img_info_button : this.options.currentPath + "info.svg";
+    infoButton.src = (this.options.img_info_button) ? this.options.img_info_button : this.options.currentPath + "img/info.svg";
     infoButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(infoButton , "click" , (function(e){this.clickInfoButton(e)}).bind(this));
 

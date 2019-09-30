@@ -1,4 +1,12 @@
-
+.fileUpload-base .img-area *,
+.fileUpload-base .img-area *:before,
+.fileUpload-base .img-area *:after{  
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -o-box-sizing: content-box;
+  -ms-box-sizing: content-box;
+  box-sizing: content-box;
+}
 
 
 .fileUpload-base{

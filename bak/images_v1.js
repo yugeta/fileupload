@@ -360,22 +360,22 @@
     control.setAttribute("data-num" , i);
 
     var rotateImage = li.querySelector("."+this.options.dom.rotate);
-    rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "img/rotate.svg";
+    rotateImage.src = (this.options.img_rotate_button !== null) ? this.options.img_rotate_button : this.options.currentPath + "rotate.svg";
     rotateImage.setAttribute("data-view" , (this.options.flg_icon_rotate === true) ? 1 : 0);
     __event(rotateImage , "click" , (function(e){this.clickRotateButton(e)}).bind(this));
 
     var delImage = li.querySelector("."+this.options.dom.delete);
-    delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "img/delete.svg";
+    delImage.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "delete.svg";
     // delImage.setAttribute("data-view" , (this.options.flg_icon_del === true) ? 1 : 0);
     __event(delImage , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
 
     var trimImage = li.querySelector("."+this.options.dom.trim);
-    trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "img/crop.svg";
+    trimImage.src = (this.options.img_trim_button !== null) ? this.options.img_trim_button : this.options.currentPath + "crop.svg";
     trimImage.setAttribute("data-view" , (this.options.flg_icon_trim === true) ? 1 : 0);
     __event(trimImage , "click" , (function(e){this.clickTrimButton(e)}).bind(this));
 
     var commentButton = li.querySelector("."+this.options.dom.comment);
-    commentButton.src = (this.options.img_comment_button !== null) ? this.options.img_comment_button : this.options.currentPath + "img/comment.svg";
+    commentButton.src = (this.options.img_comment_button !== null) ? this.options.img_comment_button : this.options.currentPath + "comment.svg";
     commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
     __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
 

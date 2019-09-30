@@ -1,3 +1,13 @@
+.fileUpload-base-sound .audio-area *,
+.fileUpload-base-sound .audio-area *:before,
+.fileUpload-base-sound .audio-area *:after{  
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -o-box-sizing: content-box;
+  -ms-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
 .fileUpload-base-sound{
   position:fixed;
   display:block;

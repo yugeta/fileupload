@@ -55,11 +55,23 @@ MYNT-File-Uploader
     * ライブラリ内の"__options"変数は全て送り値として変更することが可能です。
 
 # php.iniの設定（下記をセットしておかないと、全角文字化けになる）
-[mbstring]
-  - -mbstring.http_input = auto
-  - +mbstring.http_input = UTF-8
+  ```
+  [mbstring]
+  -mbstring.http_input = auto
+  +mbstring.http_input = UTF-8
+  ```
 
 # ID3取得関連
-  https://github.com/creeperyang/id3-parser(未使用)
-  mp3 : https://akabeko.me/blog/memo/mp3/
-  wikipedia : https://ja.wikipedia.org/wiki/ID3%E3%82%BF%E3%82%B0
+  - https://github.com/creeperyang/id3-parser(未使用)
+  - mp3 : https://akabeko.me/blog/memo/mp3/
+  - wikipedia : https://ja.wikipedia.org/wiki/ID3%E3%82%BF%E3%82%B0
+  * ※ver1.5の段階では,ID3v1に対応
+
+# ver1.6既存フォームに対応
+  - 既存の<input type="file">のonchangeイベントで起動
+  - 画像の場合の編集画面を表示 -> 決定した際に、対象エリアにプレビューを表示
+  - 編集画面で決定しても、submitされない
+  - 
+
+
+

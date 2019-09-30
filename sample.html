@@ -3,13 +3,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MYNT-FileUploader</title>
-  <script src="ajax.js"></script>
-  <script src="exif.js"></script>
+  <script src="lib/ajax.js"></script>
+  <script src="lib/exif.js"></script>
   <script src="images.js"></script>
-  <script src="images_exist.js"></script>
+  <!-- <script src="images_exist.js"></script> -->
 
   <script src="sound.js"></script>
-  <script src="encoding.js"></script>
+  <script src="lib/encoding.js"></script>
+
+  <!-- <script src="fileupload.js"></script> -->
+
 </head>
 <body>
   <h1>MYNT-File-Uploader</h1>
@@ -42,7 +45,7 @@ new $$fileupload_image({
   flg_icon_comment : true,
   contentTypes : ["image/gif" , "image/jpeg" , "image/png"], // 指定拡張子一覧（必要なもののみセット可能）
   btn_selector : "#btn_image",
-  file_select  : function(res , options){console.log(res)}
+  post_success  : function(res , options){console.log(res)}
 });
 
 
@@ -57,22 +60,22 @@ new $$fileupload_sound({
   info_area_view : false,
   contentTypes  : ["audio/mpeg"], // 指定拡張子一覧（必要なもののみセット可能）
   btn_selector : "#btn_sound",
-  file_select  : function(res , options){console.log(res)}
+  post_success  : function(res , options){console.log(res)}
 });
 
-new $$fileupload({
-  url : "http://localhost/tools/fileupload/sample_image_exist.php",
-  querys       : {
-    exit : true,
-    size : 300
-  },
-  flg_icon_rotate : true,
-  flg_icon_trim    : true,
-  flg_icon_comment : true,
-  contentTypes : ["image/gif" , "image/jpeg" , "image/png"], // 指定拡張子一覧（必要なもののみセット可能）
-  btn_selector : "#btn_image",
-  file_select  : function(res , options){console.log(res)}
-});
+// new $$fileupload({
+//   url : "http://localhost/tools/fileupload/sample_image_exist.php",
+//   querys       : {
+//     exit : true,
+//     size : 300
+//   },
+//   flg_icon_rotate : true,
+//   flg_icon_trim    : true,
+//   flg_icon_comment : true,
+//   contentTypes : ["image/gif" , "image/jpeg" , "image/png"], // 指定拡張子一覧（必要なもののみセット可能）
+//   btn_selector : "#btn_image",
+//   file_select  : function(res , options){console.log(res)}
+// });
 
 
 </script>
