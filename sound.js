@@ -1,13 +1,21 @@
 ;$$fileupload_sound = (function(){
 
+  var LIB  = function(){};
+  var SET  = function(){};
+  var GET  = function(){};
+  var VIEW = function(){};
+  var POST = function(){};
+  var ACTION = function(){};
+
+
   // 起動scriptタグを選択
-  var __currentScriptTag = (function(){
+  LIB.prototype.currentScriptTag = (function(){
     var scripts = document.getElementsByTagName("script");
-    return __currentScriptTag = scripts[scripts.length-1].src;
+    return this.currentScriptTag = scripts[scripts.length-1].src;
   })();
 
   // [共通関数] イベントセット
-	var __event = function(target, mode, func , option , wait){
+	LIB.prototype.event = function(target, mode, func , option , wait){
     option = (option) ? option : false;
     wait = (wait) ? wait : 0;
 		if (target.addEventListener){target.addEventListener(mode, func, option)}
@@ -15,7 +23,7 @@
 	};
 
   // [共通関数] URL情報分解
-	var __urlinfo = function(uri){
+	LIB.prototype.urlinfo = function(uri){
     uri = (uri) ? uri : location.href;
     var data={};
     var urls_hash  = uri.split("#");
@@ -44,7 +52,7 @@
   };
 
   // [共通関数] DOMの上位検索
-  var __upperSelector = function(elm , selectors) {
+  LIB.prototype.upperSelector = function(elm , selectors) {
     selectors = (typeof selectors === "object") ? selectors : [selectors];
     if(!elm || !selectors){return;}
     var flg = null;
@@ -63,7 +71,7 @@
   }
 
   // [共通関数] ブラウザのFileAPIが利用できるかどうかチェックする
-  var __checkFileAPI = function(){
+  LIB.prototype.checkFileAPI = function(){
     // FileApi確認
 		if( window.File
     && window.FileReader
@@ -76,14 +84,45 @@
     }
   };
 
-  var __template = null;
+  LIB.prototype.setFormatTime = function(time , mode){
+		var time2 = parseInt(time * 10 , 10) /10;
+		var m = parseInt(time2 / 60 , 10);
+		m = (m < 10) ? "0" + m.toFixed() : m.toFixed();
+		var s = parseInt(time2 % 60 , 10);
+		s = (s < 10) ? "0" + s.toFixed() : s.toFixed();
+		var ms = parseInt((time % 1) * 100 , 10);
+    ms = (ms < 10) ? "0" + ms.toFixed() : ms.toFixed();
+    if(mode === "ms"){
+      return m +":"+ s;
+    }
+    else{
+      return m +":"+ s +":"+ ms;
+    }
+  };
+
+  LIB.prototype.convertSize_b2k = function(bite){
+    var main = this;
+
+    bite = (bite) ? Number(bite) : 0;
+    var kiro = String((Math.round(bite / 1000 * 10)) / 10);
+    return kiro + " KB";
+  }
+  LIB.prototype.convertSize_b2m = function(bite){
+    var main = this;
+
+    bite = (bite) ? Number(bite) : 0;
+    var kiro = String((Math.round(bite / 1000 / 1000 * 10)) / 10);
+    return kiro + " MB";
+  }
 
   // [共通関数] JS読み込み時の実行タイミング処理（body読み込み後にJS実行する場合に使用）
-	var __construct = function(){
+	LIB.prototype.construct = function(){
+    var lib = new LIB();
+
     switch(document.readyState){
-      case "complete"    : new $$;break;
-      case "interactive" : __event(window , "DOMContentLoaded" , function(){new $$});break;
-      default            : __event(window , "load" , function(){new $$});break;
+      case "complete"    : new MAIN;break;
+      case "interactive" : lib.event(window , "DOMContentLoaded" , function(){new MAIN});break;
+      default            : lib.event(window , "load" , function(){new MAIN});break;
 		}
   };
 
@@ -148,40 +187,45 @@
             uploading_dot : "dot"
     },
 
-    file_select   : function(res){console.log(res)},  // ファイル選択直後の任意イベント処理
-    post_success  : function(res){console.log(res)},  // 1ファイルファイル送信完了後の任意イベント処理
-    post_finish   : function(res){console.log(res)},  // すべてのファイル送信完了後の任意イベント処理
-    post_error    : function(res){console.log(res)}   // ファイル送信エラーの時の任意イベント処理
+    file_select   : function(res){},  // ファイル選択直後の任意イベント処理
+    post_success  : function(res){},  // 1ファイルファイル送信完了後の任意イベント処理
+    post_finish   : function(res){},  // すべてのファイル送信完了後の任意イベント処理
+    post_error    : function(res){},  // ファイル送信エラーの時の任意イベント処理
+
+    sound_template : null
   };
 
   // ----------
 
   // インスタンスベースモジュール（初期設定処理）
-  var $$ = function(options){
+  var MAIN = function(options){
+    var main = this;
+    var lib  = new LIB();
+    var set  = new SET();
 
-    this.options = this.replaceOptions(options);
+    main.options = set.replaceOptions(options);
 
-    this.options.cacheTime = (+new Date());
-    if(!this.options.currentPath && __currentScriptTag){
-      var pathinfo = __urlinfo(__currentScriptTag);
-      this.options.currentPath = pathinfo.dir;
+    main.options.cacheTime = (+new Date());
+    if(!main.options.currentPath && lib.currentScriptTag){
+      var pathinfo = lib.urlinfo(lib.currentScriptTag);
+      main.options.currentPath = pathinfo.dir;
     }
 
     // set-css
-    this.setCss();
-    this.setTemp();
+    set.setCss();
+    set.setTemp_sound(main);
     
-    this.setTypeFile();
+    set.setTypeFile(main);
 
 		// upload-button
-    this.setButton();
+    set.setButton(main);
     
   };
 
   
 
   // [初期設定] インスタンス引数を基本設定(options)と入れ替える
-  $$.prototype.replaceOptions = function(options){
+  SET.prototype.replaceOptions = function(options){
     var res = {};
     for(var i in __options){
       res[i] = __options[i];
@@ -194,10 +238,12 @@
   };
 
   // [初期設定] 基本CSSセット
-  $$.prototype.setCss = function(){
+  SET.prototype.setCss = function(){
+    var lib  = new LIB();
+
     var head = document.getElementsByTagName("head");
     var base = (head) ? head[0] : document.body;
-    var current_pathinfo = __urlinfo(__currentScriptTag);
+    var current_pathinfo = lib.urlinfo(lib.currentScriptTag);
     var css  = document.createElement("link");
     css.rel  = "stylesheet";
     var target_css = current_pathinfo.dir + current_pathinfo.file.replace(".js",".css");
@@ -210,9 +256,10 @@
   };
 
   // [初期設定] テンプレートhtmlをセット
-  $$.prototype.setTemp = function(){
-    if(__template !== null){return}
-    var current_pathinfo = __urlinfo(__currentScriptTag);
+  SET.prototype.setTemp_sound = function(main){
+    var lib  = new LIB();
+
+    var current_pathinfo = lib.urlinfo(lib.currentScriptTag);
     var target_html = current_pathinfo.dir + current_pathinfo.file.replace(".js",".html");
     new $$ajax({
       url : target_html,
@@ -220,14 +267,14 @@
     query : {
       exit : true
     },
-    onSuccess : function(res){
-      __template = res;
-    }
+    onSuccess : (function(main,res){
+      main.options.sound_template = res;
+    }).bind(this,main)
     });
   };
 
-  $$.prototype.getBase = function(){
-    var lists = document.getElementsByClassName(this.options.dom.base);
+  GET.prototype.getBase = function(main){
+    var lists = document.getElementsByClassName(main.options.dom.base);
     if(lists.length){
       return lists[0];
     }
@@ -237,69 +284,78 @@
   };
 
   // 処理用iframe内のform内のtype=fileを取得
-  $$.prototype.getForm_typeFile = function(){
-    return document.querySelector("input[name='fileupload_"+ this.options.cacheTime +"']");
+  GET.prototype.getForm_typeFile = function(main){
+    return document.querySelector("input[name='fileupload_"+ main.options.cacheTime +"']");
   };
 
   // 編集画面の画像一覧リストの取得
-  $$.prototype.getEditLists = function(){
-    return document.querySelectorAll("."+this.options.dom.base+" ."+this.options.dom.li);
+  GET.prototype.getEditLists = function(main){
+    return document.querySelectorAll("."+main.options.dom.base+" ."+main.options.dom.li);
   };
 
-  $$.prototype.setTypeFile = function(){
+  SET.prototype.setTypeFile = function(main){
+    var lib  = new LIB();
+    var view = new VIEW();
+
     var inp      = document.createElement("input");
 		inp.type     = "file";
-    inp.name     = "fileupload_" + this.options.cacheTime;
-    inp.multiple = (this.options.file_multi) ? "multiple" : "";
+    inp.name     = "fileupload_" + main.options.cacheTime;
+    inp.multiple = (main.options.file_multi) ? "multiple" : "";
     inp.style.setProperty("display","none","");
-    inp.accept   = this.options.contentTypes.join(",");
+    inp.accept   = main.options.contentTypes.join(",");
 
-    __event(inp , "change" , (function(e){
-      if(typeof this.options.file_select === "function" && __checkFileAPI()){
+    lib.event(inp , "change" , (function(main,e){
+      if(typeof main.options.file_select === "function" && lib.checkFileAPI()){
         var input = e.currentTarget;
-        this.viewEdit(input);
-        this.options.file_select(e , this.options);
+        view.viewEdit(main , input);
+        main.options.file_select(e , main.options);
       }
-    }).bind(this));
+    }).bind(this,main));
     document.body.appendChild(inp);
 
   };
   
   // [初期設定] データ読み込みボタンclickイベント処理
-  $$.prototype.setButton = function(){
-    var btns = document.querySelectorAll(this.options.btn_selector);
+  SET.prototype.setButton = function(main){
+    var lib = new LIB();
+
+    var btns = document.querySelectorAll(main.options.btn_selector);
     for(var i=0; i<btns.length; i++){
-      __event(btns[i] , "click" , (function(e){this.clickFileButton(e)}).bind(this));
+      lib.event(btns[i] , "click" , (function(main){new SET().clickFileButton(main)}).bind(this,main));
     }
   };
 
   // データ取得ボタンクリック時の処理
-  $$.prototype.clickFileButton = function(e){
-    var typeFile = this.getForm_typeFile();
+  SET.prototype.clickFileButton = function(main){
+    var get  = new GET();
+
+    var typeFile = get.getForm_typeFile(main);
     typeFile.click();
   };
 
 
   // [画像編集] 送信前の画像編集操作処理
-  $$.prototype.viewEdit = function(targetInputForm){
-    this.viewBase();
-    this.viewLists(targetInputForm);
+  VIEW.prototype.viewEdit = function(main , targetInputForm){
+    var view = new VIEW();
 
+    view.viewBase(main);
+    view.viewLists(main , targetInputForm);
     // システムデータ保持
-    this.options.id = Math.floor((+new Date())/1000);
-    this.options.count = targetInputForm.files.length;
+    main.options.id = Math.floor((+new Date())/1000);
+    main.options.count = targetInputForm.files.length;
   };
 
 
   // [画像編集] 編集画面表示（複数画像対応）
-  $$.prototype.viewLists = function(filesElement){
-
+  VIEW.prototype.viewLists = function(main , filesElement){
     if(!filesElement){return;}
+
+    var set = new SET();
 
     var files = filesElement.files;
     if(!files || !files.length){return;}
 
-    var bgs = document.getElementsByClassName(this.options.dom.base);
+    var bgs = document.getElementsByClassName(main.options.dom.base);
     if(!bgs || !bgs.length){return;}
     var bg = bgs[0];
 
@@ -307,27 +363,28 @@
     bg.appendChild(ul);
 
     for(var i=0; i<files.length; i++){
-      var li = this.setList(files[i] , i);
+      var li = set.setList(main , files[i] , i);
       ul.appendChild(li);
     }
 
     // submit,cancel-button
     var file_count = files.length;
-    var li = this.setControlButtons(file_count);
+    var li = set.setControlButtons(main , file_count);
     ul.appendChild(li);
   };
 
 
   // プレビュー表示の写真表示箇所のエレメントセット
-  $$.prototype.setList = function(fl,i){
+  SET.prototype.setList = function(main , fl,i){
+    var lib  = new LIB();
     
     var parser = new DOMParser();
-    var doc = parser.parseFromString(__template, "text/html");
-    var li = doc.querySelector("."+this.options.dom.li);
+    var doc = parser.parseFromString(main.options.sound_template, "text/html");
+    var li = doc.querySelector("."+main.options.dom.li);
     li.setAttribute("data-num" , i);
 
-    var audio  = li.querySelector("."+this.options.dom.audio);
-    var source = audio.querySelector("."+this.options.dom.source);
+    var audio  = li.querySelector("."+main.options.dom.audio);
+    var source = audio.querySelector("."+main.options.dom.source);
 
     var path = URL.createObjectURL(fl);
     source.src = path;
@@ -336,26 +393,27 @@
     audio.setAttribute("data-type"   , fl.type);
     audio.setAttribute("data-size"   , fl.size);
 
-    var info_area = li.querySelector("."+this.options.dom.info);
-    if(info_area && this.options.info_area_view){
-      info_area.setAttribute("data-view" , this.options.info_area_view);
+    var info_area = li.querySelector("."+main.options.dom.info);
+    if(info_area && main.options.info_area_view){
+      info_area.setAttribute("data-view" , main.options.info_area_view);
     }
 
-    var info_time = li.querySelector("."+this.options.dom.info_time);
+    var info_time = li.querySelector("."+main.options.dom.info_time);
+
     if(info_time){
-      __event(audio , "loadedmetadata" , (function(info_time,e){
+      lib.event(audio , "loadedmetadata" , (function(info_time,e){
         var audio = e.target;
         var tm = audio.duration;
-        info_time.textContent = this.setFormatTime(tm);
-        audio.setAttribute("data-time"   , audio.duration);
-      }).bind(this,info_time));
+        info_time.textContent = new LIB().setFormatTime(tm);
+        audio.setAttribute("data-time" , audio.duration);
+      }).bind(this , info_time));
     }
     
-    var info_title = li.querySelector("."+this.options.dom.info_title);
+    var info_title = li.querySelector("."+main.options.dom.info_title);
     if(info_title){
       info_title.textContent = fl.name;
     }
-    var info_title_input = li.querySelector("."+this.options.dom.info_title_input);
+    var info_title_input = li.querySelector("."+main.options.dom.info_title_input);
     if(info_title_input){
       var title = fl.name
       title = title.replace(/\.mp3/,"");
@@ -363,13 +421,13 @@
     }
 
 
-    var info_type = li.querySelector("."+this.options.dom.info_type);
+    var info_type = li.querySelector("."+main.options.dom.info_type);
     if(info_type){
       info_type.textContent = fl.type;
     }
 
-    var info_size = li.querySelector("."+this.options.dom.info_size);
-    var size = (fl.size.length <= 6) ? this.convertSize_b2k(sifl.sizeze) : this.convertSize_b2m(fl.size);
+    var info_size = li.querySelector("."+main.options.dom.info_size);
+    var size = (fl.size.length <= 6) ? lib.convertSize_b2k(sifl.sizeze) : lib.convertSize_b2m(fl.size);
     if(info_size){
       info_size.textContent = size;
     }
@@ -378,38 +436,38 @@
     // var control = li.querySelector("."+this.options.dom.control);
     // control.setAttribute("data-num" , i);
 
-    var delElement = li.querySelector("."+this.options.dom.delete_button);
-    delElement.src = (this.options.img_delete_button !== null) ? this.options.img_delete_button : this.options.currentPath + "img/delete.svg";
-    __event(delElement , "click" , (function(e){this.clickDeleteButton(e)}).bind(this));
+    var delElement = li.querySelector("."+main.options.dom.delete_button);
+    delElement.src = (main.options.img_delete_button !== null) ? main.options.img_delete_button : main.options.currentPath + "img/delete.svg";
+    lib.event(delElement , "click" , (function(main,e){new ACTION().clickDeleteButton(main,e)}).bind(this,main));
 
-    var commentButton = li.querySelector("."+this.options.dom.comment_button);
-    commentButton.src = (this.options.img_comment_button) ? this.options.img_comment_button : this.options.currentPath + "img/comment.svg";
-    commentButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
-    __event(commentButton , "click" , (function(e){this.clickCommentButton(e)}).bind(this));
+    var commentButton = li.querySelector("."+main.options.dom.comment_button);
+    commentButton.src = (main.options.img_comment_button) ? main.options.img_comment_button : main.options.currentPath + "img/comment.svg";
+    commentButton.setAttribute("data-view" , (main.options.flg_icon_comment === true) ? 1 : 0);
+    lib.event(commentButton , "click" , (function(main,e){new ACTION().clickCommentButton(main , e)}).bind(this,main));
 
-    var infoButton = li.querySelector("."+this.options.dom.info_button);
-    infoButton.src = (this.options.img_info_button) ? this.options.img_info_button : this.options.currentPath + "img/info.svg";
-    infoButton.setAttribute("data-view" , (this.options.flg_icon_comment === true) ? 1 : 0);
-    __event(infoButton , "click" , (function(e){this.clickInfoButton(e)}).bind(this));
+    var infoButton = li.querySelector("."+main.options.dom.info_button);
+    infoButton.src = (main.options.img_info_button) ? main.options.img_info_button : main.options.currentPath + "img/info.svg";
+    infoButton.setAttribute("data-view" , (main.options.flg_icon_comment === true) ? 1 : 0);
+    lib.event(infoButton , "click" , (function(main , e){new ACTION().clickInfoButton(main , e)}).bind(this , main));
 
-    var commentForm = li.querySelector("."+this.options.dom.comment_form);
+    var commentForm = li.querySelector("."+main.options.dom.comment_form);
     if(commentForm){
-      commentForm.placeholder = (this.options.comment.placeholder) ? this.options.comment.placeholder : "";
+      commentForm.placeholder = (main.options.comment.placeholder) ? main.options.comment.placeholder : "";
     }
 
     // IDv3
     var reader = new FileReader();
     reader.readAsArrayBuffer(fl);
-    reader.onload = (function(li , filename , type , size , e){
-      var res = this.getMp3ID3Tag(e.target.result , e.target.buffer);
+    reader.onload = (function(main , li , filename , type , size , e){
+      var res = new GET().getMp3ID3Tag(e.target.result , e.target.buffer);
       // console.log(res);
-      var tag_area = li.querySelector("."+this.options.dom.idv3);
-      var endtime = li.querySelector("."+this.options.dom.audio).getAttribute("data-time");
+      var tag_area = li.querySelector("."+main.options.dom.idv3);
+      var endtime = li.querySelector("."+main.options.dom.audio).getAttribute("data-time");
       if(tag_area){
         var htmls = [];
         htmls.push("<b>[ ファイル情報 ]</b>");
         htmls.push("  File : "    + filename);
-        htmls.push("  Time : "    + this.setFormatTime(endtime , "ms"));
+        htmls.push("  Time : "    + new LIB().setFormatTime(endtime , "ms"));
         htmls.push("  Type : "    + type);
         htmls.push("  Size : "    + size);
 
@@ -431,48 +489,52 @@
         
         tag_area.innerHTML = htmls.join("\n");
       }
-    }).bind(this , li , fl.name , fl.type , size);
+    }).bind(this , main , li , fl.name , fl.type , size);
 
     return li;
   };
 
-  // mp3のID3タグ情報の取得
-  // [0:TAG 1:title 2:artist 3:album 4:date 5:comment 6:genre-no]
-  $$.prototype.getMp3IDTag = function(result , buffer){
-    if(!result){return null;}
-    if(typeof window.Encoding === "undefined"){return null;}
-    var id3v1 = (new Uint8Array(result)).slice(-128);
-    var judge = id3v1[0] + id3v1[1] + id3v1[2];
-    var arr = [];
-    if (judge == 220) {
-      var num = 0;
-      for (var i=0; i<=127; i++) {
-        if(i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
-        if(id3v1[i] == 0){continue}
-        arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
-        arr[num] += String.fromCharCode(id3v1[i]);
-      }
-      for(var i=0; i<arr.length; i++){
-        var str = Encoding.convert(arr[i] , "UNICODE" , "SJIS");
-        // var str = arr[i];
-        str = str.replace(/\u000f/g , "");
-        str = str.replace(/^ +/g , "");
-        str = str.replace(/ +$/g , "");
-        arr[i] = str;
-      }
-    }
-// console.log(new Uint8Array(buffer));
-// console.log(id3v1);
-// console.log(id3v1[0] +"+"+ id3v1[1] +"+"+ id3v1[2]+":"+id3v1.length);
-// console.log(judge);
-// console.log((new Uint8Array(result)).slice(128));
-// console.log(id3v1.length);
+//   // mp3のID3タグ情報の取得
+//   // [0:TAG 1:title 2:artist 3:album 4:date 5:comment 6:genre-no]
+//   GET.prototype.getMp3IDTag = function(result , buffer){
+//     if(!result){return null;}
+//     if(typeof window.Encoding === "undefined"){return null;}
+//     var main = this;
 
-    return arr;
-  };
-  $$.prototype.getMp3ID3Tag = function(result){
+//     var id3v1 = (new Uint8Array(result)).slice(-128);
+//     var judge = id3v1[0] + id3v1[1] + id3v1[2];
+//     var arr = [];
+//     if (judge == 220) {
+//       var num = 0;
+//       for (var i=0; i<=127; i++) {
+//         if(i == 3 || i == 33 || i == 63 || i == 93 || i == 97 || i == 127){num++}
+//         if(id3v1[i] == 0){continue}
+//         arr[num] = (typeof arr[num] !== "undefined") ? arr[num] : "";
+//         arr[num] += String.fromCharCode(id3v1[i]);
+//       }
+//       for(var i=0; i<arr.length; i++){
+//         var str = Encoding.convert(arr[i] , "UNICODE" , "SJIS");
+//         // var str = arr[i];
+//         str = str.replace(/\u000f/g , "");
+//         str = str.replace(/^ +/g , "");
+//         str = str.replace(/ +$/g , "");
+//         arr[i] = str;
+//       }
+//     }
+// // console.log(new Uint8Array(buffer));
+// // console.log(id3v1);
+// // console.log(id3v1[0] +"+"+ id3v1[1] +"+"+ id3v1[2]+":"+id3v1.length);
+// // console.log(judge);
+// // console.log((new Uint8Array(result)).slice(128));
+// // console.log(id3v1.length);
+
+//     return arr;
+//   };
+
+  GET.prototype.getMp3ID3Tag = function(result){
     if(!result){return null;}
     if(typeof window.Encoding === "undefined"){return null;}
+
     var id3v1 = (new Uint8Array(result)).slice(-128);
     var judge = id3v1[0] + id3v1[1] + id3v1[2];
     var arr = [];
@@ -498,9 +560,11 @@
 
 
   // submit,cancel-button
-  $$.prototype.setControlButtons = function(file_count){
+  SET.prototype.setControlButtons = function(main , file_count){
+    var lib  = new LIB();
+
     var li = document.createElement("li");
-    li.className = this.options.dom.li_submit;
+    li.className = main.options.dom.li_submit;
 
     var sendButton = document.createElement("button");
     if(file_count > 1){
@@ -510,20 +574,20 @@
       sendButton.innerHTML = "送信";
     }
     
-    __event(sendButton , "click" , (function(e){this.clickSendButton(e)}).bind(this));
+    lib.event(sendButton , "click" , (function(main,e){new ACTION().clickSendButton(main,e)}).bind(this,main));
     li.appendChild(sendButton);
 
     var cancelButton = document.createElement("button");
     cancelButton.innerHTML = "キャンセル";
-    __event(cancelButton , "click" , (function(e){this.clickCancel(e)}).bind(this));
+    lib.event(cancelButton , "click" , (function(main){new ACTION().clickCancel(main)}).bind(this,main));
     li.appendChild(cancelButton);
 
     var uploading = document.createElement("div");
-    uploading.className = this.options.dom.uploading;
+    uploading.className = main.options.dom.uploading;
     li.appendChild(uploading);
     for(var i=0; i<12;i++){
       var dot = document.createElement("div");
-      dot.className = this.options.dom.uploading_dot;
+      dot.className = main.options.dom.uploading_dot;
       uploading.appendChild(dot);
     }
 
@@ -534,80 +598,91 @@
 
 
   // [画像編集] BG表示
-  $$.prototype.viewBase = function(){
+  VIEW.prototype.viewBase = function(main){
     var bg = document.createElement("div");
-    bg.className = this.options.dom.base;
+    bg.className = main.options.dom.base;
     document.body.appendChild(bg);
   };
 
 
   //
-  $$.prototype.clickDeleteButton = function(e){
+  ACTION.prototype.clickDeleteButton = function(main , e){
     if(!confirm("アップロードリストから写真を破棄しますか？※直接撮影された写真は保存されません。")){return;}
+    var lib    = new LIB();
+    var get    = new GET();
+    var action = new ACTION();
 
     var target = e.currentTarget;
-    var li = __upperSelector(target , ["."+this.options.dom.li]);
+    var li = lib.upperSelector(target , ["."+main.options.dom.li]);
     if(!li){return;}
     var num = li.getAttribute("data-num");
     if(num === null){return;}
 
-    var targetListBase = document.querySelector("."+this.options.dom.base+" ul li."+this.options.dom.li+"[data-num='"+num+"']");
+    var targetListBase = document.querySelector("."+main.options.dom.base+" ul li."+main.options.dom.li+"[data-num='"+num+"']");
     if(!targetListBase){return;}
 
     targetListBase.parentNode.removeChild(targetListBase);
 
     // ラスト１つを削除した場合は、キャンセル扱い
-    var lists = this.getEditLists();
+    var lists = get.getEditLists(main);
     if(!lists || !lists.length){
-      this.clickCancel();
+      action.clickCancel(main);
     }
 
     // キャッシュデータを更新
-    this.options.count = lists.length;
+    main.options.count = lists.length;
   }
 
 
   // 
-  $$.prototype.clickCancel = function(){
+  ACTION.prototype.clickCancel = function(main){
+    var get  = new GET();
 
-    var base = this.getBase();
+    var base = get.getBase(main);
     if(base){
       base.parentNode.removeChild(base);
     }
 
-    var input = this.getForm_typeFile();
+    var input = get.getForm_typeFile(main);
     input.value = "";
-
   };
 
 
 
-  $$.prototype.clickSendButton = function(e){
-    var files = this.getForm_typeFile().files;
-    var lists = this.getEditLists();
+  ACTION.prototype.clickSendButton = function(main , e){
+    var get  = new GET();
+    var post = new POST();
+
+    var files = get.getForm_typeFile(main).files;
+    var lists = get.getEditLists(main);
     for(var i=0; i<lists.length; i++){
       var num = lists[i].getAttribute("data-num");
-      this.postFiles_cache.push(files[num]);
+      post.postFiles_cache.push(files[num]);
     }
 
+    // submitボタンを押せないようにする
+    post.disable_submitButtin(main , e.target);
+
     // uploading フラグ設置
-    var submitArea = document.querySelector("."+this.options.dom.base+" li."+this.options.li_submit);
+    var submitArea = document.querySelector("."+main.options.dom.base+" li."+main.options.li_submit);
     if(submitArea){
       submitArea.setAttribute("data-uploading","1");
     }
 
-    if(this.postFiles_cache.length > 0){
-      this.postFile(lists[0]);
+    if(post.postFiles_cache.length > 0){
+      post.postFile(main , lists[0]);
     }
   };
 
-  $$.prototype.clickCommentButton = function(e){
-    var button = e.currentTarget;
-    var li = __upperSelector(button , ["."+this.options.dom.li]);
-    if(!li){return}
-    var comment_area = li.querySelector("."+this.options.dom.comment_area);
+  ACTION.prototype.clickCommentButton = function(main , e){
+    var lib  = new LIB();
 
-    var comment_form = comment_area.querySelector("."+this.options.dom.comment_form);
+    var button = e.currentTarget;
+    var li = lib.upperSelector(button , ["."+main.options.dom.li]);
+    if(!li){return}
+    var comment_area = li.querySelector("."+main.options.dom.comment_area);
+
+    var comment_form = comment_area.querySelector("."+main.options.dom.comment_form);
 
     if(comment_area.getAttribute("data-view") === "0" || comment_form.value !== ""){
       comment_area.setAttribute("data-view","1");
@@ -617,11 +692,13 @@
     }
   }
 
-  $$.prototype.clickInfoButton = function(e){
+  ACTION.prototype.clickInfoButton = function(main , e){
+    var lib  = new LIB();
+
     var button = e.currentTarget;
-    var li = __upperSelector(button , ["."+this.options.dom.li]);
+    var li = lib.upperSelector(button , ["."+main.options.dom.li]);
     if(!li){return}
-    var idv3 = li.querySelector("."+this.options.dom.idv3);
+    var idv3 = li.querySelector("."+main.options.dom.idv3);
     if(!idv3){return}
     if(idv3.getAttribute("data-view") !== "1"){
       idv3.setAttribute("data-view","1");
@@ -631,11 +708,13 @@
     }
   };
 
-  
+  POST.prototype.disable_submitButtin = function(main , button){
+    button.textContent = "...";
+    button.disabled = true;
+  };
 
-  $$.prototype.postFiles_cache = [];
-  $$.prototype.postFile = function(viewListElement){
-
+  POST.prototype.postFiles_cache = [];
+  POST.prototype.postFile = function(main , viewListElement){
     if(!window.FormData){
       console.log("データ送信機能がブラウザに対応していません。");
       return;
@@ -645,56 +724,66 @@
       console.log("AJAX機能がブラウザに対応していません。");
       return;
     }
+    var main   = main;
+    var action = new ACTION();
+    var post   = this;
+    var get    = new GET();
 
     // 全て送信完了したら編集画面を閉じる
-    if(!this.postFiles_cache.length){
-      this.clickCancel();
+    if(!post.postFiles_cache.length){
+      action.clickCancel(main);
       return;
     }
 
+    // areaに送信中フラグをセット
+    var area = viewListElement.querySelector("."+main.options.dom.audio_area);
+    if(area){
+      area.setAttribute("data-uploading" , "1");
+    }
+
     var fd   = new FormData();
-    if(this.options.querys){
-      for(var i in this.options.querys){
-        fd.append(i , this.options.querys[i]);
+    if(main.options.querys){
+      for(var i in main.options.querys){
+        fd.append(i , main.options.querys[i]);
       }
     }
-    var name_input = viewListElement.querySelector("."+ this.options.dom.info_title_input);
+    var name_input = viewListElement.querySelector("."+ main.options.dom.info_title_input);
     if(name_input){
-      fd.append("info[name]"   , this.set_postStringFormat(name_input.value));
+      fd.append("info[name]"   , post.set_postStringFormat(main , name_input.value));
     }
 
-    fd.append("id"           , this.options.id);
-    fd.append("num"          , (this.options.count - this.postFiles_cache.length));
-    fd.append("audioFile"    , this.postFiles_cache[0]);
+    fd.append("id"           , main.options.id);
+    fd.append("num"          , (main.options.count - post.postFiles_cache.length));
+    fd.append("audioFile"    , post.postFiles_cache[0]);
     
-    fd.append("info[file]"   , this.set_postStringFormat(this.postFiles_cache[0].name));
-    fd.append("info[modi]"   , this.set_postStringFormat(this.postFiles_cache[0].lastModified));
-    fd.append("info[date]"   , this.set_postStringFormat(Date.parse(this.postFiles_cache[0].lastModifiedDate)));
+    fd.append("info[file]"   , post.set_postStringFormat(main , post.postFiles_cache[0].name));
+    fd.append("info[modi]"   , post.set_postStringFormat(main , post.postFiles_cache[0].lastModified));
+    fd.append("info[date]"   , post.set_postStringFormat(main , Date.parse(post.postFiles_cache[0].lastModifiedDate)));
     
-    var audio = viewListElement.querySelector("."+ this.options.dom.audio);
-    fd.append("info[type]"   , this.set_postStringFormat((audio.getAttribute("data-type"))));
-    fd.append("info[size]"   , this.set_postStringFormat((audio.getAttribute("data-size"))));
-    fd.append("info[time]"   , this.set_postStringFormat((audio.getAttribute("data-time"))));
+    var audio = viewListElement.querySelector("."+ main.options.dom.audio);
+    fd.append("info[type]"   , post.set_postStringFormat(main , audio.getAttribute("data-type")));
+    fd.append("info[size]"   , post.set_postStringFormat(main , audio.getAttribute("data-size")));
+    fd.append("info[time]"   , post.set_postStringFormat(main , audio.getAttribute("data-time")));
 
     // id3tag
-    var idv3 = viewListElement.querySelector("."+ this.options.dom.idv3);
-    fd.append("id3tag[title]"   , this.set_postStringFormat(idv3.getAttribute("data-title")));
-    fd.append("id3tag[artist]"  , this.set_postStringFormat(idv3.getAttribute("data-artist")));
-    fd.append("id3tag[album]"   , this.set_postStringFormat(idv3.getAttribute("data-album")));
-    fd.append("id3tag[date]"    , this.set_postStringFormat(idv3.getAttribute("data-date")));
-    fd.append("id3tag[comment]" , this.set_postStringFormat(idv3.getAttribute("data-comment")));
+    var idv3 = viewListElement.querySelector("."+ main.options.dom.idv3);
+    fd.append("id3tag[title]"   , post.set_postStringFormat(main , idv3.getAttribute("data-title")));
+    fd.append("id3tag[artist]"  , post.set_postStringFormat(main , idv3.getAttribute("data-artist")));
+    fd.append("id3tag[album]"   , post.set_postStringFormat(main , idv3.getAttribute("data-album")));
+    fd.append("id3tag[date]"    , post.set_postStringFormat(main , idv3.getAttribute("data-date")));
+    fd.append("id3tag[comment]" , post.set_postStringFormat(main , idv3.getAttribute("data-comment")));
 
     // comment
-    var comment = viewListElement.querySelector("."+ this.options.dom.comment_form);
+    var comment = viewListElement.querySelector("."+ main.options.dom.comment_form);
     if(comment){
-      fd.append("info[comment]" , this.set_postStringFormat(comment.value));
+      fd.append("info[comment]" , post.set_postStringFormat(main , comment.value));
     }
 
-    var lists = this.getEditLists();
+    var lists = get.getEditLists(main);
     if(!lists.length){return;}
 
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = (function(xhr,e){
+    xhr.onreadystatechange = (function(main , xhr,e){
       switch(xhr.readyState){
         case 0:
           // 未初期化状態.
@@ -712,24 +801,24 @@
         case 4: // データ受信完了.
           switch(xhr.status){
             case 200 :
-              var finish_flg = this.post_success();
+              var finish_flg = post.post_success(main);
 
               // ユーザー処理
-              if(this.options.post_success){
-                this.options.post_success(xhr.responseText , this.options);
+              if(main.options.post_success){
+                main.options.post_success(xhr.responseText , main.options);
               }
 
               // 複数ファイル完了処理
               if(finish_flg === true){
-                this.options.post_finish(xhr.responseText , this.options);
+                main.options.post_finish(xhr.responseText , main.options);
               }
 
               break;
             case 404 :
               console.log("Error (404) : Not found. " + res);
               
-              if(this.options.post_error){
-                this.options.post_error(xhr.responseText , this.options)
+              if(main.options.post_error){
+                main.options.post_error(xhr.responseText , main.options)
               }
               break;
             default :
@@ -738,16 +827,16 @@
           }
           break;
       }
-    }).bind(this,xhr);
-    var url = (this.options.url) ? this.options.url : location.href;
+    }).bind(this,main,xhr);
+    var url = (main.options.url) ? main.options.url : location.href;
     xhr.open('POST', url);
     xhr.send(fd);
 
   };
 
-  $$.prototype.set_postStringFormat = function(str){
+  POST.prototype.set_postStringFormat = function(main , str){
     if(typeof str !== "string"){return str;}
-    switch(this.options.postStringFormat){
+    switch(main.options.postStringFormat){
       case "encode":
         return encodeURIComponent(str);
 
@@ -756,7 +845,9 @@
     }
   };
 
-  $$.prototype.post_success = function(){
+  POST.prototype.post_success = function(main){
+    var action = new ACTION();
+    var get    = new GET();
 
     // メモリしてあるファイル一覧から送信済みを削除
     if(this.postFiles_cache.length){
@@ -764,13 +855,13 @@
     }
 
     // 表示一覧から送信済みを削除
-    var lists = this.getEditLists();
+    var lists = get.getEditLists(main);
     if(lists.length){
       lists[0].parentNode.removeChild(lists[0]);
     }
 
     // 送信後の削除処理をした直後のエレメント一覧の取得
-    var lists = this.getEditLists();
+    var lists = get.getEditLists(main);
 
     // 次のファイルが存在
     if(lists.length){
@@ -781,43 +872,11 @@
     // 最終完了
     else{
       // 表示を閉じる
-      this.clickCancel();
+      action.clickCancel(main);
       return true;
     }
   };
-
-
-
-  $$.prototype.convertSize_b2k = function(bite){
-    bite = (bite) ? Number(bite) : 0;
-    var kiro = String((Math.round(bite / 1000 * 10)) / 10);
-    return kiro + " KB";
-  }
-  $$.prototype.convertSize_b2m = function(bite){
-    bite = (bite) ? Number(bite) : 0;
-    var kiro = String((Math.round(bite / 1000 / 1000 * 10)) / 10);
-    return kiro + " MB";
-  }
-
-  $$.prototype.setFormatTime = function(time , mode){
-		var time2 = parseInt(time * 10 , 10) /10;
-		var m = parseInt(time2 / 60 , 10);
-		m = (m < 10) ? "0" + m.toFixed() : m.toFixed();
-		var s = parseInt(time2 % 60 , 10);
-		s = (s < 10) ? "0" + s.toFixed() : s.toFixed();
-		var ms = parseInt((time % 1) * 100 , 10);
-    ms = (ms < 10) ? "0" + ms.toFixed() : ms.toFixed();
-    if(mode === "ms"){
-      return m +":"+ s;
-    }
-    else{
-      return m +":"+ s +":"+ ms;
-    }
-  };
   
-
-
-  
-  return $$;
+  return MAIN;
 
 })();

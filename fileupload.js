@@ -1,11 +1,13 @@
 ;$$fileupload = (function(){
 
-	var __event = function(target, mode, func){
+  var LIB = function(){};
+
+	LIB.prototype.event = function(target, mode, func){
 		if (target.addEventListener){target.addEventListener(mode, func, false)}
 		else{target.attachEvent('on' + mode, function(){func.call(target , window.event)})}
 	};
 
-	var __urlinfo = function(uri){
+	LIB.prototype.urlinfo = function(uri){
     uri = (uri) ? uri : location.href;
     var data={};
     var urls_hash  = uri.split("#");
@@ -33,7 +35,7 @@
 		return data;
   };
 
-  var __upperSelector = function(elm , selectors) {
+  LIB.prototype.upperSelector = function(elm , selectors) {
     selectors = (typeof selectors === "object") ? selectors : [selectors];
     if(!elm || !selectors){return;}
     var flg = null;
@@ -51,7 +53,7 @@
     return cur;
   }
 
-  var __checkFileAPI = function(){
+  LIB.prototype.checkFileAPI = function(){
     // FileApi確認
 		if( window.File
     && window.FileReader
@@ -64,17 +66,19 @@
     }
   };
 
-	var __construct = function(){
+	LIB.prototype.construct = function(){
+    var lib = new LIB();
+
     switch(document.readyState){
-      case "complete"    : new $$;break;
-      case "interactive" : __event(window , "DOMContentLoaded" , function(){new $$});break;
-      default            : __event(window , "load" , function(){new $$});break;
+      case "complete"    : new MAIN;break;
+      case "interactive" : lib.event(window , "DOMContentLoaded" , function(){new MAIN});break;
+      default            : lib.event(window , "load" , function(){new MAIN});break;
 		}
   };
 
   // ----------
 
-  var $$ = function(data){
+  var MAIN = function(data){
 
     data.cacheTime = (+new Date());
 
@@ -87,16 +91,20 @@
 
   };
 
-  $$.prototype.makeIframe = function(data){
+  MAIN.prototype.makeIframe = function(data){
+    var lib = new LIB();
+
     var iframe = document.createElement("iframe");
     iframe.src = data.iframe_src;
     iframe.style.setProperty("display","none","");
-    __event(iframe , "load" , (function(iframe,data,e){this.setIframeInner(iframe,data)}).bind(this,iframe,data));
+    lib.event(iframe , "load" , (function(iframe,data,e){this.setIframeInner(iframe,data)}).bind(this,iframe,data));
     document.body.appendChild(iframe);
     return iframe;
   };
 
-  $$.prototype.setIframeInner = function(iframe , data){
+  MAIN.prototype.setIframeInner = function(iframe , data){
+    var lib = new LIB();
+
     var form     = document.createElement("form");
 		form.name    = "form_" + data.cacheTime;
 		form.method  = "POST";
@@ -106,8 +114,8 @@
     var inp     = document.createElement("input");
 		inp.type    = "file";
     inp.name    = data.input_name;
-    __event(inp , "change" , (function(iframe,data,e){
-      if(typeof data.file_select === "function" && __checkFileAPI()){
+    lib.event(inp , "change" , (function(iframe,data,e){
+      if(typeof data.file_select === "function" && lib.checkFileAPI()){
         var input = e.currentTarget;
         data.file_select("filename : "+input.value);
         // console.log(window.File);
@@ -134,14 +142,16 @@
     iframe.contentWindow.document.body.appendChild(form);
   };
   
-  $$.prototype.setButton = function(iframe , data){
+  MAIN.prototype.setButton = function(iframe , data){
+    var lib = new LIB();
+
     var btns = document.querySelectorAll(data.btn_selector);
     for(var i=0; i<btns.length; i++){
-      __event(btns[i] , "click" , (function(e){this.clickFileButton(e, iframe)}).bind(this , iframe));
+      lib.event(btns[i] , "click" , (function(e){this.clickFileButton(e, iframe)}).bind(this , iframe));
     }
   };
 
-  $$.prototype.clickFileButton = function(iframe , e){
+  MAIN.prototype.clickFileButton = function(iframe , e){
     if(!iframe
     || !iframe.contentWindow
     || !iframe.contentWindow.document.body){
@@ -154,12 +164,7 @@
   };
 
   
-
-
-
-
-  // __construct();
   
-  return $$;
+  return MAIN;
 
 })();
