@@ -1,5 +1,5 @@
 <?php
-namespace mynt\lib\fileupload;
+namespace mynt\plugin\fileupload;
 
 class sound{
 

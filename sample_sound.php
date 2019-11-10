@@ -1,5 +1,6 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
 // echo "Upload...".$_FILES["imageFile"]["name"];
 
 // postデータを保存する

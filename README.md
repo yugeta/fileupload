@@ -13,6 +13,7 @@ MYNT-File-Uploader
   * ver 1.4 : comment-input
   * ver 1.5 : sound : IDv3
   * ver 1.6 : Existing form Correspondence.（既存のフォームに対応）
+  * ver 1.7 : Uploading animation.
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様
@@ -73,5 +74,11 @@ MYNT-File-Uploader
   - 編集画面で決定しても、submitされない
   - 
 
-
+# Request
+  - データアップロードのアップローディングアニメーション（画像や音楽ファイルなど）
+  - 画像のトリム操作のポイントイベントをもう少し操作感よくする
+  - 画像の切り抜き操作を並行四角のみでなく、4隅それぞれ任意の座標に移動できるようにする。
+    ※PHPでの画像の歪み操作をしなければいけない。
+  - アップロードした画像(jpeg)の圧縮率アップ（容量軽減の為）
+  
 

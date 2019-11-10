@@ -1,5 +1,7 @@
 <?php
-namespace mynt\lib\fileupload;
+namespace mynt\plugin\fileupload;
+
+header("Access-Control-Allow-Origin: *");
 
 // echo "Upload...".$_FILES["imageFile"]["name"];
 require_once "php/image.php";
@@ -25,19 +27,19 @@ function savePost_and_json(){
   $savePath = $dir.$id;
 
   // 元ファイル名を取得
-  $filename = \mynt\lib\fileupload\image::getFilename();
+  $filename = \mynt\plugin\fileupload\image::getFilename();
 
   // 拡張子
-  $ext = \mynt\lib\fileupload\image::getExtension($filename);
+  $ext = \mynt\plugin\fileupload\image::getExtension($filename);
 
   // EXIFデータを取得
-  $exif = \mynt\lib\fileupload\image::getExif($filename);
+  $exif = \mynt\plugin\fileupload\image::getExif();
 
   // 元データと保存先データ
   $imagePath = $savePath.".".$ext;
 
   // data-save
-  \mynt\lib\fileupload\image::save($imagePath);
+  \mynt\plugin\fileupload\image::save($imagePath);
 
   // saveデータ取得
   $json_data = array(

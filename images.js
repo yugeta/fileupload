@@ -899,17 +899,18 @@
     
   };
   $$.prototype.trim_pointer_move = function(e,pagex,pagey){
-    e.preventDefault();
 
     // pointer
     if(this.trim_pointer_target
     && this.trim_pointer_imgSize
     && this.trim_pointer_parent){
+      e.preventDefault();
       this.set_trim_pointer_target(this.trim_pointer_target , this.trim_pointer_parent , this.trim_pointer_imgSize , pagex , pagey);
     }
 
     // trim-box
     else if(this.trim_box.target){
+      e.preventDefault();
       this.set_trim_box_control(pagex , pagey);
     }
   }

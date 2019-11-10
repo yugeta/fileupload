@@ -1,5 +1,5 @@
 <?php
-namespace mynt\lib\fileupload;
+namespace mynt\plugin\fileupload;
 
 class image{
 
@@ -22,9 +22,9 @@ class image{
     $trim_left   = ($trim_left)   ? $trim_left   : $_REQUEST["trim"]["left"];
     
 
-    if(isset($_REQUEST["trim"])
-    && $trim_width  < $base_width
-    && $trim_height < $base_height){
+    // if(isset($_REQUEST["trim"])
+    // && $trim_width  < $base_width
+    // && $trim_height < $base_height){
       // 読み込み
       $thumb = imagecreatetruecolor($trim_width, $trim_height);
       $source = imagecreatefromjpeg($tmpPath);
@@ -61,6 +61,14 @@ class image{
       // 出力
       imagejpeg($thumb , $savePath);
       imagedestroy($thumb);
+    // }
+
+    // 確認
+    if(is_file($savePath)){
+      return array("status" => "ok" , "file" => $savePath);
+    }
+    else{
+      return array("status" => "error" , "message" => "Don't make file. ".$savepath);
     }
   }
 
@@ -79,7 +87,7 @@ class image{
   public static function getExif($file=""){
     $file = ($file) ? $file : self::getSystemfilePath();
     if(is_file($file)){
-      return exif_read_data($file);
+      return exif_read_data($file , 0 , null);
     }
     else{
       return null;
@@ -93,7 +101,7 @@ class image{
       return pathinfo($file)["extension"];
     }
     else{
-      return;
+      return "";
     }
   }
 
@@ -103,18 +111,26 @@ class image{
     if(isset($_REQUEST["trim"])
     && $_REQUEST["trim"]["width"]  < $_REQUEST["info"]["width"]
     && $_REQUEST["trim"]["height"] < $_REQUEST["info"]["height"]){
-      self::trim($savepath);
+      $res = self::trim($savepath);
     }
 
     // trimデータが無い場合は、そのまま保存
     else{
-      self::upload($savepath);
+      $res = self::upload($savepath);
     }
+
+    return json_encode($res , JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
 
   // upload-file-move
   public static function upload($savepath , $basepath=""){
     $basepath = ($basepath) ? $basepath : $_FILES["imageFile"]["tmp_name"];
     move_uploaded_file($basepath , $savepath);
+    if(is_file($savepath)){
+      return array("status" => "ok" , "file" => $savepath);
+    }
+    else{
+      return array("status" => "error" , "message" => "Don't make file. ".$savepath);
+    }
   }
 }
