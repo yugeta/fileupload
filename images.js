@@ -408,7 +408,7 @@
 
 
   // プレビュー表示の写真表示箇所のエレメントセット
-  VIEW.prototype.setList = function(main , fl,i){
+  VIEW.prototype.setList = function(main , fl , i){
     var main = main;
     var lib  = new LIB();
 
@@ -418,6 +418,7 @@
     li.setAttribute("data-num" , i);
 
     var img = li.querySelector("."+main.options.dom.img);
+
     img.setAttribute("data-num"    , i);
     img.setAttribute("data-type"   , fl.type);
     img.setAttribute("data-size"   , fl.size);
@@ -433,6 +434,38 @@
     }).bind(this,main));
     var path = URL.createObjectURL(fl);
     img.src = path;
+
+
+//     var fileReader = new FileReader();
+//     lib.event(fileReader , "load" , (function(main,img,fl,num,e){
+
+//       img.src = e.target.result;
+//       img.setAttribute("data-num"    , num);
+//       img.setAttribute("data-type"   , fl.type);
+//       img.setAttribute("data-size"   , fl.size);
+// // console.log(img);
+
+//       new SET().loadedImage(main , {target:img});
+//       new TRIM().setTrimPreview(main , img);
+
+//       // set-info
+//       var parent = lib.upperSelector(img , ["."+main.options.dom.li]);
+//       if(!parent){return;}
+//       var pid = parent.getAttribute("data-num");
+//       new VIEW().setInfo(main , pid , img);
+//     }).bind(this,main,img,fl,i));
+//     fileReader.readAsDataURL(fl);
+
+//     console.log(fileReader);
+
+
+
+    // var path = URL.createObjectURL(fl);
+// console.log(path);
+// console.log(new FileReader().readAsDataURL(fl));
+    // var path = URL.createObjectURL(fl,"text/plane");
+
+    
 
     var control = li.querySelector("."+main.options.dom.control);
     control.setAttribute("data-num" , i);
@@ -736,6 +769,7 @@
       var res = EXIF.getData(img , (function(main , img , e) {
         var exifData = EXIF.getAllTags(img);
         new SET().setOrientation(main , img , exifData);
+        img.setAttribute("data-exif" , JSON.stringify(exifData));
       }).bind(this , main , img));
     }
   };
@@ -748,10 +782,25 @@
     var trim = new TRIM();
 
     var img_area = lib.upperSelector(img , ["."+main.options.dom.img_area]);
-    img_area.setAttribute("data-orientation" , exifData.Orientation);
+    var orientation = (this.isIOSdevice()) ? 1 : exifData.Orientation;
+    img_area.setAttribute("data-orientation" , orientation);
     var pic = lib.upperSelector(img_area , ["."+main.options.dom.li]);
     trim.setTrimRotate_reset(main , pic , 0);
   };
+
+  SET.prototype.isIOSdevice = function(){
+    if(typeof window.ontouchstart === "undefined"){
+      return false;
+    }
+    if(navigator.userAgent.indexOf("iPhone") !== -1
+    || navigator.userAgent.indexOf("iPad") !== -1
+    || navigator.userAgent.indexOf("Macintosh") !== -1){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 
   SET.prototype.clickSendButton = function(main,e){
     var main = main;
@@ -857,7 +906,7 @@
     var lists = get.getEditImageLists(main);
     if(!lists.length){return;}
 
-    var img = lists[0].querySelector("img");
+    var img = lists[0].querySelector(".img-area img.picture");
     var exifData = img.getAttribute("data-exif");
     if(exifData){
       fd.append("exif" , exifData);

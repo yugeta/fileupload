@@ -481,11 +481,11 @@
         }
 
         // id3tag-data-set
-        tag_area.setAttribute("data-title"   , ((res[1]) ? res[1] : ""));
-        tag_area.setAttribute("data-artist"  , ((res[1]) ? res[2] : ""));
-        tag_area.setAttribute("data-album"   , ((res[1]) ? res[3] : ""));
-        tag_area.setAttribute("data-date"    , ((res[1]) ? res[4] : ""));
-        tag_area.setAttribute("data-comment" , ((res[1]) ? res[5] : ""));
+        tag_area.setAttribute("data-title"   , (res && (res[1]) ? res[1] : ""));
+        tag_area.setAttribute("data-artist"  , (res && (res[1]) ? res[2] : ""));
+        tag_area.setAttribute("data-album"   , (res && (res[1]) ? res[3] : ""));
+        tag_area.setAttribute("data-date"    , (res && (res[1]) ? res[4] : ""));
+        tag_area.setAttribute("data-comment" , (res && (res[1]) ? res[5] : ""));
         
         tag_area.innerHTML = htmls.join("\n");
       }
