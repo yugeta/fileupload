@@ -9,6 +9,7 @@
   <!-- <script src="images_exist.js"></script> -->
 
   <script src="sound.js"></script>
+  <script src="video.js"></script>
   <script src="lib/encoding.js"></script>
 
   <!-- <script src="fileupload.js"></script> -->
@@ -25,6 +26,11 @@
   <h2>Sound</h2>
   <div>
     <button id="btn_sound" type="button">pickup-file (sounds)</button>
+  </div>
+
+  <h2>Video</h2>
+  <div>
+    <button id="btn_video" type="button">pickup-file (videos)</button>
   </div>
 
   <h2>Existing form</h2>
@@ -60,6 +66,20 @@ new $$fileupload_sound({
   info_area_view : false,
   contentTypes  : ["audio/mpeg"], // 指定拡張子一覧（必要なもののみセット可能）
   btn_selector : "#btn_sound",
+  post_success  : function(res , options){console.log(res)}
+});
+
+new $$fileupload_video({
+  url : "./sample_video.php",
+  querys       : {
+    exit : true,
+    size : 300
+  },
+  flg_icon_comment : true,
+  flg_icon_title : true,
+  info_area_view : false,
+  contentTypes  : ["video/mp4"], // 指定拡張子一覧（必要なもののみセット可能）
+  btn_selector : "#btn_video",
   post_success  : function(res , options){console.log(res)}
 });
 

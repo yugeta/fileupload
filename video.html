@@ -1,0 +1,42 @@
+<li class="video" data-num="{{id}}">
+  <div class="num">
+    <input class="info-title-input" />
+    <img class="delete" src="delete.svg">
+  </div>
+  <div class="video-area">
+    <video class="video" controls>
+      <source class="source" src="">
+      </video>
+    <div class="loading-area">
+      <div class="loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="info" data-view="">
+    <div class="info-time">{{time}}</div>
+    <div class="info-type">{{content-type}}</div>
+    <div class="info-size">{{content-size}}</div>
+  </div>
+
+  <div class="control" data-num="0">
+    <img class="comment-icon" src="comment.svg">
+    <img class="info-icon" src="info.svg">
+  </div>
+  
+  <div class="comment-area" data-view="0">
+    <textarea class="comment-form" placeholder="Comment"></textarea>
+  </div>
+
+  <!-- <div class="idv3-area" data-view="0">Title : {{idv3-title}}
+    Album : {{idv3-album}}
+    Artist : {{idv3-artist}}</div> -->
+</li>
