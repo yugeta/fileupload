@@ -15,6 +15,7 @@ MYNT-File-Uploader
   * ver 1.6 : Existing form Correspondence.（既存のフォームに対応）
   * ver 1.7 : refactoring
   * ver 1.7.1 : Uploading animation.
+  * ver 1.8 : video
 
 
 # upload.php : データアップロード用受けCGI(php)の仕様
