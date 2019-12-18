@@ -46,7 +46,6 @@ function savePost_and_json(){
     "extension" => $ext,
     "date"      => $time,
     "info"      => $_REQUEST["info"],
-    "id3tag"    => $_REQUEST["id3tag"],
     "postData"  => $_FILES["videoFile"]
   );
 

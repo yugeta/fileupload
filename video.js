@@ -865,7 +865,7 @@
 
     // 次のファイルが存在
     if(lists.length){
-      setTimeout((function(lists,e){this.postFile(lists)}).bind(this,lists[0]) , 100);
+      setTimeout((function(main,list,e){this.postFile(main,list)}).bind(this,main,lists[0]) , 100);
       return false;
     }
 
